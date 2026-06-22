@@ -11,7 +11,7 @@ public sealed class InMemoryTokenStoreTests
     [Fact]
     public async Task GetAsync_ReturnsNull_WhenEmpty()
     {
-        var result = await _store.GetAsync();
+        var result = await _store.GetAsync(TestContext.Current.CancellationToken);
         Assert.Null(result);
     }
 
@@ -19,9 +19,9 @@ public sealed class InMemoryTokenStoreTests
     public async Task SetAsync_ThenGetAsync_ReturnsStoredToken()
     {
         var token = new AccessToken("abc", "bearer", 3600, null, [], DateTimeOffset.UtcNow);
-        await _store.SetAsync(token);
+        await _store.SetAsync(token, TestContext.Current.CancellationToken);
 
-        var result = await _store.GetAsync();
+        var result = await _store.GetAsync(TestContext.Current.CancellationToken);
         Assert.Equal(token, result);
     }
 
@@ -29,10 +29,10 @@ public sealed class InMemoryTokenStoreTests
     public async Task ClearAsync_RemovesToken()
     {
         var token = new AccessToken("abc", "bearer", 3600, null, [], DateTimeOffset.UtcNow);
-        await _store.SetAsync(token);
-        await _store.ClearAsync();
+        await _store.SetAsync(token, TestContext.Current.CancellationToken);
+        await _store.ClearAsync(TestContext.Current.CancellationToken);
 
-        var result = await _store.GetAsync();
+        var result = await _store.GetAsync(TestContext.Current.CancellationToken);
         Assert.Null(result);
     }
 

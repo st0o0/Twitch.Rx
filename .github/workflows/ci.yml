@@ -38,20 +38,32 @@ jobs:
       - name: Build
         run: dotnet build src/Twitch.Rx.slnx --configuration Release --no-restore
 
-      - name: Test
-        run: dotnet test src/Twitch.Rx.slnx --configuration Release --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --collect:"XPlat Code Coverage"
+      - name: Test with Coverage
+        run: >-
+          dotnet test src/Twitch.Rx.slnx
+          --configuration Release
+          --no-build
+          --verbosity normal
+          --
+          --coverage
+          --coverage-output-format cobertura
+          --coverage-output ${{ github.workspace }}/coverage.cobertura.xml
 
-      - name: Test Report
-        uses: dorny/test-reporter@v1
+      - name: ReportGenerator
+        uses: danielpalme/ReportGenerator-GitHub-Action@5
         if: always()
         with:
-          name: Test Results
-          path: "**/*.trx"
-          reporter: dotnet-trx
+          reports: "${{ github.workspace }}/**/coverage.cobertura.xml"
+          targetdir: "${{ github.workspace }}/coveragereport"
+          reporttypes: "Html;MarkdownSummaryGithub"
 
-      - name: Upload Coverage
+      - name: Publish Coverage to Summary
+        if: always()
+        run: cat ${{ github.workspace }}/coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: coverage
-          path: "**/coverage.cobertura.xml"
+          name: coverage-report
+          path: ${{ github.workspace }}/coveragereport

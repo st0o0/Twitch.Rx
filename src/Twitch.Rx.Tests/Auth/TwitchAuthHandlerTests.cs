@@ -25,7 +25,7 @@ public sealed class TwitchAuthHandlerTests
         var inner = new FakeHttpHandler(new HttpResponseMessage(HttpStatusCode.OK));
         using var client = CreateClient(inner);
 
-        await client.GetAsync("https://api.twitch.tv/helix/users");
+        await client.GetAsync("https://api.twitch.tv/helix/users", TestContext.Current.CancellationToken);
 
         var clientIdValues = inner.LastRequest!.Headers.GetValues("Client-Id").ToList();
         Assert.Single(clientIdValues);
@@ -46,7 +46,7 @@ public sealed class TwitchAuthHandlerTests
             new HttpResponseMessage(HttpStatusCode.OK));
         using var client = CreateClient(inner);
 
-        var response = await client.GetAsync("https://api.twitch.tv/helix/users");
+        var response = await client.GetAsync("https://api.twitch.tv/helix/users", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         await _auth.Received(1).RefreshTokenAsync(Arg.Any<CancellationToken>());
@@ -64,7 +64,7 @@ public sealed class TwitchAuthHandlerTests
         var inner = new FakeHttpHandler(rateLimited, new HttpResponseMessage(HttpStatusCode.OK));
         using var client = CreateClient(inner);
 
-        var response = await client.GetAsync("https://api.twitch.tv/helix/users");
+        var response = await client.GetAsync("https://api.twitch.tv/helix/users", TestContext.Current.CancellationToken);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Equal(2, inner.RequestCount);

@@ -14,7 +14,7 @@ public sealed class UsersEndpointTests
         var handler = new FakeHttpHandler(UserResponse("123", "testuser", "TestUser"));
         var endpoint = CreateEndpoint(handler);
 
-        var user = await endpoint.GetByLoginAsync("testuser");
+        var user = await endpoint.GetByLoginAsync("testuser", TestContext.Current.CancellationToken);
 
         Assert.NotNull(user);
         Assert.Equal("123", user!.Id);
@@ -28,7 +28,7 @@ public sealed class UsersEndpointTests
         var handler = new FakeHttpHandler(EmptyResponse());
         var endpoint = CreateEndpoint(handler);
 
-        var user = await endpoint.GetByLoginAsync("nonexistent");
+        var user = await endpoint.GetByLoginAsync("nonexistent", TestContext.Current.CancellationToken);
 
         Assert.Null(user);
     }
@@ -39,7 +39,7 @@ public sealed class UsersEndpointTests
         var handler = new FakeHttpHandler(UserResponse("123", "testuser", "TestUser"));
         var endpoint = CreateEndpoint(handler);
 
-        var user = await endpoint.GetByIdAsync("123");
+        var user = await endpoint.GetByIdAsync("123", TestContext.Current.CancellationToken);
 
         Assert.NotNull(user);
         Assert.Contains("id=123", handler.LastRequest!.RequestUri!.Query);

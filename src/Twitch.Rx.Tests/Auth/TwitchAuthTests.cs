@@ -23,7 +23,7 @@ public sealed class TwitchAuthTests : IDisposable
         var handler = new FakeHttpHandler(TokenResponse("test-token", 3600));
         await using var auth = CreateAuth(handler);
 
-        var token = await auth.GetTokenAsync();
+        var token = await auth.GetTokenAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal("test-token", token.Token);
         Assert.Equal(3600, token.ExpiresIn);
@@ -36,8 +36,8 @@ public sealed class TwitchAuthTests : IDisposable
         var handler = new FakeHttpHandler(TokenResponse("token", 3600));
         await using var auth = CreateAuth(handler);
 
-        await auth.GetTokenAsync();
-        await auth.GetTokenAsync();
+        await auth.GetTokenAsync(TestContext.Current.CancellationToken);
+        await auth.GetTokenAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(1, handler.RequestCount);
     }
@@ -50,7 +50,7 @@ public sealed class TwitchAuthTests : IDisposable
         var handler = new FakeHttpHandler();
         await using var auth = CreateAuth(handler);
 
-        var token = await auth.GetTokenAsync();
+        var token = await auth.GetTokenAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal("pre-seeded", token.Token);
         Assert.Equal(0, handler.RequestCount);
@@ -65,7 +65,7 @@ public sealed class TwitchAuthTests : IDisposable
         AccessToken? emitted = null;
         _subscriptions.Add(auth.TokenChanged.Subscribe(t => emitted = t));
 
-        await auth.GetTokenAsync();
+        await auth.GetTokenAsync(TestContext.Current.CancellationToken);
 
         Assert.NotNull(emitted);
         Assert.Equal("token", emitted!.Token);
@@ -79,10 +79,10 @@ public sealed class TwitchAuthTests : IDisposable
         var handler = new FakeHttpHandler(TokenResponse("refreshed", 3600, "new-refresh"));
         await using var auth = CreateAuth(handler);
 
-        var token = await auth.RefreshTokenAsync();
+        var token = await auth.RefreshTokenAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal("refreshed", token.Token);
-        var body = await handler.LastRequest!.Content!.ReadAsStringAsync();
+        var body = await handler.LastRequest!.Content!.ReadAsStringAsync(TestContext.Current.CancellationToken);
         Assert.Contains("grant_type=refresh_token", body);
         Assert.Contains("refresh_token=refresh-123", body);
     }
@@ -95,8 +95,8 @@ public sealed class TwitchAuthTests : IDisposable
             ValidationResponse());
         await using var auth = CreateAuth(handler);
 
-        await auth.GetTokenAsync();
-        var validation = await auth.ValidateAsync();
+        await auth.GetTokenAsync(TestContext.Current.CancellationToken);
+        var validation = await auth.ValidateAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal("test-client-id", validation.ClientId);
         Assert.Equal("testuser", validation.Login);

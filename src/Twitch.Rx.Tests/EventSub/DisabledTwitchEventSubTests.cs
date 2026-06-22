@@ -22,7 +22,7 @@ public sealed class DisabledTwitchEventSubTests
     {
         var disabled = new DisabledTwitchEventSub();
 
-        await disabled.ConnectAsync();
+        await disabled.ConnectAsync(TestContext.Current.CancellationToken);
     }
 
     [Fact]

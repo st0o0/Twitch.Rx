@@ -33,7 +33,7 @@ public sealed class EventSubTransportTests : IDisposable
         var transport = CreateTransport();
         _subs.Add(transport.ConnectionState.Subscribe(s => states.Add(s)));
 
-        await transport.ConnectAsync();
+        await transport.ConnectAsync(TestContext.Current.CancellationToken);
 
         await _wsClient.Received(1).StartOrFailAsync(Arg.Any<CancellationToken>());
         Assert.Contains(EventSubConnectionState.Connecting, states);
@@ -46,7 +46,7 @@ public sealed class EventSubTransportTests : IDisposable
         string? sessionId = null;
         _subs.Add(transport.SessionId.Subscribe(id => sessionId = id));
 
-        await transport.ConnectAsync();
+        await transport.ConnectAsync(TestContext.Current.CancellationToken);
         EmitWelcome("session-abc", 10);
 
         Assert.Equal("session-abc", sessionId);
@@ -59,7 +59,7 @@ public sealed class EventSubTransportTests : IDisposable
         var transport = CreateTransport();
         _subs.Add(transport.ConnectionState.Subscribe(s => states.Add(s)));
 
-        await transport.ConnectAsync();
+        await transport.ConnectAsync(TestContext.Current.CancellationToken);
         EmitWelcome("s1", 10);
 
         Assert.Contains(EventSubConnectionState.Connected, states);
@@ -72,7 +72,7 @@ public sealed class EventSubTransportTests : IDisposable
         EventSubEnvelope? received = null;
         _subs.Add(transport.Messages.Subscribe(e => received = e));
 
-        await transport.ConnectAsync();
+        await transport.ConnectAsync(TestContext.Current.CancellationToken);
         EmitKeepalive();
 
         Assert.NotNull(received);

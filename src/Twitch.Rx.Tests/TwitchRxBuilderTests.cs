@@ -54,7 +54,7 @@ public sealed class TwitchRxBuilderTests
         }).Build();
 
         // EventSub.Enabled defaults to false - just await; it'll throw if broken
-        await client.EventSub.ConnectAsync();
+        await client.EventSub.ConnectAsync(TestContext.Current.CancellationToken);
     }
 
     [Fact]

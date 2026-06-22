@@ -26,7 +26,7 @@ public sealed class EventSubSubscriptionManagerTests
         var manager = new EventSubSubscriptionManager(httpClient, subs);
         var errors = new Subject<EventSubError>();
 
-        await manager.CreateSubscriptionsAsync("session-abc", errors);
+        await manager.CreateSubscriptionsAsync("session-abc", errors, TestContext.Current.CancellationToken);
 
         Assert.Equal(2, handler.RequestCount);
         errors.Dispose();
@@ -51,7 +51,7 @@ public sealed class EventSubSubscriptionManagerTests
         var errorList = new List<EventSubError>();
         using var sub = errors.Subscribe(e => errorList.Add(e));
 
-        await manager.CreateSubscriptionsAsync("session-abc", errors);
+        await manager.CreateSubscriptionsAsync("session-abc", errors, TestContext.Current.CancellationToken);
 
         Assert.Equal(2, handler.RequestCount);
         Assert.Single(errorList);
