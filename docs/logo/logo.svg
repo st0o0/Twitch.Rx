@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9146FF"/>
+      <stop offset="100%" style="stop-color:#6441A4"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="24" fill="url(#bg)"/>
+  <!-- Twitch-style speech bubble -->
+  <path d="M30 28h68v52H78l-12 12v-12H30V28z" fill="white" opacity="0.95"/>
+  <!-- Rx symbol -->
+  <text x="64" y="62" text-anchor="middle" font-family="Consolas,monospace" font-weight="bold" font-size="28" fill="#6441A4">Rx</text>
+  <!-- Reactive wave dots -->
+  <circle cx="38" cy="100" r="4" fill="white" opacity="0.5"/>
+  <circle cx="52" cy="96" r="5" fill="white" opacity="0.7"/>
+  <circle cx="66" cy="100" r="4" fill="white" opacity="0.5"/>
+  <circle cx="80" cy="96" r="5" fill="white" opacity="0.7"/>
+  <circle cx="94" cy="100" r="4" fill="white" opacity="0.5"/>
+</svg>
