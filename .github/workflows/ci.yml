@@ -1,69 +1,173 @@
-name: CI
+name: Build and Release NuGet Package
 
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - "docs/**"
-      - "**.md"
-      - LICENSE.md
   pull_request:
     branches: [main]
-    paths-ignore:
-      - "docs/**"
-      - "**.md"
-      - LICENSE.md
 
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+env:
+  GLOBAL_JSON_PATH: "./src/global.json"
+  PROJECT_PATH: "./src/Twitch.Rx.slnx"
+  PACKAGE_OUTPUT_DIRECTORY: "./packages"
+  TEST_OUTPUT_DIRECTORY: "${{ github.workspace }}/testresults"
+  COVERAGE_REPORT_DIRECTORY: "./coveragereport"
+
+permissions:
+  contents: write
+  deployments: write
 
 jobs:
-  build-and-test:
-    name: Build & Test
+  build:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
+    outputs:
+      releaseVersion: ${{ steps.gitversion.outputs.majorMinorPatch }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          global-json-file: src/global.json
+          global-json-file: ${{ env.GLOBAL_JSON_PATH }}
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v1.1.1
+        with:
+          versionSpec: "5.x"
+
+      - name: Determine Version
+        uses: gittools/actions/gitversion/execute@v1.1.1
+        id: gitversion
+
+      - name: Display Version
+        run: |
+          echo "Release Version: ${{ steps.gitversion.outputs.majorMinorPatch }}"
+          echo "NuGet Version: ${{ steps.gitversion.outputs.fullSemVer }}"
 
       - name: Restore
-        run: dotnet restore src/Twitch.Rx.slnx
+        run: dotnet restore ${{ env.PROJECT_PATH }}
 
       - name: Build
-        run: dotnet build src/Twitch.Rx.slnx --configuration Release --no-restore
+        run: >-
+          dotnet build
+          --configuration Release
+          --no-restore
+          ${{ env.PROJECT_PATH }}
+          /p:Version=${{ steps.gitversion.outputs.fullSemVer }}
+          /p:ContinuousIntegrationBuild=true
 
       - name: Test with Coverage
+        working-directory: "./src"
         run: >-
-          dotnet test src/Twitch.Rx.slnx
+          dotnet test
           --configuration Release
           --no-build
-          --verbosity normal
-          --
           --coverage
           --coverage-output-format cobertura
-          --coverage-output ${{ github.workspace }}/coverage.cobertura.xml
+          --results-directory ${{ env.TEST_OUTPUT_DIRECTORY }}
 
-      - name: ReportGenerator
+      - name: Pack
+        run: >-
+          dotnet pack
+          --configuration Release
+          --no-build
+          --output ${{ env.PACKAGE_OUTPUT_DIRECTORY }}
+          ${{ env.PROJECT_PATH }}
+          /p:PackageVersion=${{ steps.gitversion.outputs.fullSemVer }}
+
+      - name: Report Code Coverage
         uses: danielpalme/ReportGenerator-GitHub-Action@5
         if: always()
         with:
-          reports: "${{ github.workspace }}/**/coverage.cobertura.xml"
-          targetdir: "${{ github.workspace }}/coveragereport"
-          reporttypes: "Html;MarkdownSummaryGithub"
+          reports: "${{ env.TEST_OUTPUT_DIRECTORY }}/*cobertura.xml"
+          targetdir: "${{ env.COVERAGE_REPORT_DIRECTORY }}"
+          reporttypes: "MarkdownSummaryGithub"
+          tag: "${{ steps.gitversion.outputs.fullSemVer }}"
 
-      - name: Publish Coverage to Summary
+      - name: Add Coverage Summary
         if: always()
-        run: cat ${{ github.workspace }}/coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+        run: cat ${{ env.COVERAGE_REPORT_DIRECTORY }}/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
 
-      - name: Upload Coverage Report
+      - name: Upload Package Artifacts
         uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: coverage-report
-          path: ${{ github.workspace }}/coveragereport
+          name: nuget-packages
+          path: ${{ env.PACKAGE_OUTPUT_DIRECTORY }}/*.nupkg
+
+  publish:
+    permissions:
+      contents: write
+      deployments: write
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: nuget
+      url: https://www.nuget.org/packages/Twitch.Rx
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Download Package Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nuget-packages
+          path: ${{ env.PACKAGE_OUTPUT_DIRECTORY }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: ${{ env.GLOBAL_JSON_PATH }}
+
+      - name: Publish to NuGet
+        run: >-
+          dotnet nuget push
+          --api-key ${{ secrets.NUGET_API_KEY }}
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate
+          ${{ env.PACKAGE_OUTPUT_DIRECTORY }}/*.nupkg
+
+      - name: Generate Release Notes
+        id: notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.releaseVersion }}
+        run: |
+          cat > notes.md << EOF
+          🎯 Twitch.Rx v$VERSION
+
+          [![NuGet](https://img.shields.io/nuget/v/Twitch.Rx?logo=nuget)](https://nuget.org/packages/Twitch.Rx)
+          [![GitHub](https://img.shields.io/github/last-commit/st0o0/Twitch.Rx/main?logo=github)](https://github.com/st0o0/Twitch.Rx)
+
+          EOF
+
+          gh api repos/${{ github.repository }}/releases/generate-notes \
+            -f tag_name="v\$VERSION" \
+            --jq .body >> notes.md || echo "## 📋 Changes\nNo changelog available" >> notes.md
+
+          sed -i "s|v\$VERSION|v$VERSION|g" notes.md
+          echo "Built with ❤️" >> notes.md
+          echo "release-notes<<EOF" >> $GITHUB_OUTPUT
+          cat notes.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create & Publish Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ needs.build.outputs.releaseVersion }}"
+          target_commitish: ${{ github.sha }}
+          name: "v${{ needs.build.outputs.releaseVersion }}"
+          body: ${{ steps.notes.outputs.release-notes }}
+          draft: false
+          prerelease: false
+          make_latest: true
+          files: ${{ env.PACKAGE_OUTPUT_DIRECTORY }}/*.nupkg
