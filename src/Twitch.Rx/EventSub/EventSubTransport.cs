@@ -13,6 +13,7 @@ internal sealed class EventSubTransport : IAsyncDisposable
     private readonly Subject<string> _sessionId = new();
     private readonly ReactiveProperty<EventSubConnectionState> _connectionState = new(EventSubConnectionState.Disconnected);
     private IDisposable? _messageSubscription;
+    private CancellationTokenSource? _keepaliveCts;
 
     public Observable<EventSubEnvelope> Messages => _messages;
     public Observable<string> SessionId => _sessionId;
@@ -48,6 +49,7 @@ internal sealed class EventSubTransport : IAsyncDisposable
             message.Text.Span, EventSubJsonContext.Default.EventSubEnvelope);
         if (envelope is null) return;
 
+        ResetKeepaliveTimer();
         _messages.OnNext(envelope);
 
         switch (envelope.Metadata.MessageType)
@@ -55,23 +57,73 @@ internal sealed class EventSubTransport : IAsyncDisposable
             case "session_welcome" when envelope.Payload.Session is not null:
                 _connectionState.Value = EventSubConnectionState.Connected;
                 _sessionId.OnNext(envelope.Payload.Session.Id);
+                var timeout = _options.KeepaliveTimeout
+                    ?? (envelope.Payload.Session.KeepaliveTimeoutSeconds is { } secs
+                        ? TimeSpan.FromSeconds(secs + 5)
+                        : null);
+                if (timeout is not null)
+                    StartKeepaliveTimer(timeout.Value);
                 break;
 
             case "session_reconnect" when envelope.Payload.Session?.ReconnectUrl is not null:
                 _connectionState.Value = EventSubConnectionState.Reconnecting;
-                _ = ReconnectAsync(new Uri(envelope.Payload.Session.ReconnectUrl));
+                _ = ReconnectWithErrorHandlingAsync(new Uri(envelope.Payload.Session.ReconnectUrl));
                 break;
         }
     }
 
-    private async Task ReconnectAsync(Uri newUrl)
+    private async Task ReconnectWithErrorHandlingAsync(Uri newUrl)
     {
-        _wsClient.Url = newUrl;
-        await _wsClient.ReconnectOrFailAsync();
+        try
+        {
+            _wsClient.Url = newUrl;
+            await _wsClient.ReconnectOrFailAsync();
+        }
+        catch (Exception)
+        {
+            _connectionState.Value = EventSubConnectionState.Disconnected;
+        }
+    }
+
+    private void StartKeepaliveTimer(TimeSpan timeout)
+    {
+        _keepaliveCts?.Cancel();
+        _keepaliveCts?.Dispose();
+        _keepaliveCts = new CancellationTokenSource();
+        _ = KeepaliveWatchdogAsync(timeout, _keepaliveCts.Token);
+    }
+
+    private void ResetKeepaliveTimer()
+    {
+        if (_keepaliveCts is not null)
+        {
+            var timeout = _options.KeepaliveTimeout ?? TimeSpan.FromSeconds(15);
+            _keepaliveCts.Cancel();
+            _keepaliveCts.Dispose();
+            _keepaliveCts = new CancellationTokenSource();
+            _ = KeepaliveWatchdogAsync(timeout, _keepaliveCts.Token);
+        }
+    }
+
+    private async Task KeepaliveWatchdogAsync(TimeSpan timeout, CancellationToken ct)
+    {
+        try
+        {
+            await Task.Delay(timeout, ct);
+            _connectionState.Value = EventSubConnectionState.Reconnecting;
+            await _wsClient.ReconnectOrFailAsync();
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception)
+        {
+            _connectionState.Value = EventSubConnectionState.Disconnected;
+        }
     }
 
     public async ValueTask DisposeAsync()
     {
+        _keepaliveCts?.Cancel();
+        _keepaliveCts?.Dispose();
         _messageSubscription?.Dispose();
         _messages.Dispose();
         _sessionId.Dispose();

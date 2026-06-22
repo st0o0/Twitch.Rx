@@ -13,7 +13,7 @@ public sealed class TwitchAuth : ITwitchAuth
     private readonly SemaphoreSlim _lock = new(1, 1);
     private readonly Subject<AccessToken> _tokenChanged = new();
     private readonly Subject<AuthError> _errors = new();
-    private bool _seeded;
+    private volatile bool _seeded;
 
     public Observable<AccessToken> TokenChanged => _tokenChanged;
     public Observable<AuthError> Errors => _errors;
@@ -65,14 +65,17 @@ public sealed class TwitchAuth : ITwitchAuth
 
     public async ValueTask<AccessToken> RefreshTokenAsync(CancellationToken ct = default)
     {
-        var cached = await _tokenStore.GetAsync(ct);
-        var refreshToken = cached?.RefreshToken ?? _options.RefreshToken
-            ?? throw new InvalidOperationException("No refresh token available.");
-
         await _lock.WaitAsync(ct);
         try
         {
-            return await RefreshTokenCoreAsync(refreshToken, ct);
+            var cached = await _tokenStore.GetAsync(ct);
+            var refreshToken = cached?.RefreshToken ?? _options.RefreshToken;
+
+            if (refreshToken is not null)
+                return await RefreshTokenCoreAsync(refreshToken, ct);
+
+            // No refresh token available — re-acquire via client credentials
+            return await AcquireClientCredentialsAsync(ct);
         }
         finally { _lock.Release(); }
     }

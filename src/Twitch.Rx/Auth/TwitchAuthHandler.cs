@@ -8,6 +8,14 @@ internal sealed class TwitchAuthHandler(ITwitchAuth auth, string clientId) : Del
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, CancellationToken ct)
     {
+        byte[]? requestBody = null;
+        MediaTypeHeaderValue? contentType = null;
+        if (request.Content is not null)
+        {
+            requestBody = await request.Content.ReadAsByteArrayAsync(ct);
+            contentType = request.Content.Headers.ContentType;
+        }
+
         await ApplyAuthAsync(request, ct);
 
         var response = await base.SendAsync(request, ct);
@@ -15,17 +23,16 @@ internal sealed class TwitchAuthHandler(ITwitchAuth auth, string clientId) : Del
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
             var refreshed = await auth.RefreshTokenAsync(ct);
-            using var retry = await CloneRequestAsync(request);
+            using var retry = CloneRequestFromBytes(request, requestBody, contentType);
             retry.Headers.Authorization = new AuthenticationHeaderValue("Bearer", refreshed.Token);
             retry.Headers.TryAddWithoutValidation("Client-Id", clientId);
             response = await base.SendAsync(retry, ct);
         }
-
-        if (response.StatusCode == (HttpStatusCode)429)
+        else if (response.StatusCode == (HttpStatusCode)429)
         {
             var delay = GetRateLimitDelay(response);
             await Task.Delay(delay, ct);
-            using var retry = await CloneRequestAsync(request);
+            using var retry = CloneRequestFromBytes(request, requestBody, contentType);
             await ApplyAuthAsync(retry, ct);
             response = await base.SendAsync(retry, ct);
         }
@@ -56,15 +63,15 @@ internal sealed class TwitchAuthHandler(ITwitchAuth auth, string clientId) : Del
         return TimeSpan.FromSeconds(1);
     }
 
-    private static async Task<HttpRequestMessage> CloneRequestAsync(HttpRequestMessage request)
+    private static HttpRequestMessage CloneRequestFromBytes(
+        HttpRequestMessage request, byte[]? body, MediaTypeHeaderValue? contentType)
     {
         var clone = new HttpRequestMessage(request.Method, request.RequestUri);
-        if (request.Content is not null)
+        if (body is not null)
         {
-            var bytes = await request.Content.ReadAsByteArrayAsync();
-            clone.Content = new ByteArrayContent(bytes);
-            if (request.Content.Headers.ContentType is not null)
-                clone.Content.Headers.ContentType = request.Content.Headers.ContentType;
+            clone.Content = new ByteArrayContent(body);
+            if (contentType is not null)
+                clone.Content.Headers.ContentType = contentType;
         }
         foreach (var header in request.Headers)
         {

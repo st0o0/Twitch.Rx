@@ -11,13 +11,14 @@ public static class TwitchRxServiceExtensions
         this IServiceCollection services,
         Action<TwitchRxOptions> configure)
     {
-        var builder = TwitchRx.CreateBuilder(configure);
-        var client = builder.Build();
-
-        services.AddSingleton(client);
-        services.AddSingleton(client.Auth);
-        services.AddSingleton(client.Api);
-        services.AddSingleton(client.EventSub);
+        services.AddSingleton<ITwitchRxClient>(sp =>
+        {
+            var builder = TwitchRx.CreateBuilder(configure);
+            return builder.Build();
+        });
+        services.AddSingleton(sp => sp.GetRequiredService<ITwitchRxClient>().Auth);
+        services.AddSingleton(sp => sp.GetRequiredService<ITwitchRxClient>().Api);
+        services.AddSingleton(sp => sp.GetRequiredService<ITwitchRxClient>().EventSub);
 
         return services;
     }

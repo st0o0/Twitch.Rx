@@ -28,6 +28,10 @@ internal sealed class EventSubSubscriptionManager(
                 var response = await httpClient.SendAsync(request, ct);
                 response.EnsureSuccessStatusCode();
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 errors.OnNext(new EventSubError($"Failed to create subscription for {sub.Type}", ex));
