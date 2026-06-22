@@ -106,7 +106,12 @@ public sealed class TwitchAuth : ITwitchAuth
         });
 
         var response = await _httpClient.PostAsync("/oauth2/token", content, ct);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync(ct);
+            throw new HttpRequestException(
+                $"Token acquisition failed ({response.StatusCode}): {body}");
+        }
         return await StoreAndEmitAsync(response, ct);
     }
 

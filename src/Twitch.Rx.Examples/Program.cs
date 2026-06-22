@@ -65,8 +65,17 @@ Console.WriteLine();
 
 // --- API Test ---
 Console.WriteLine("[API] Authenticating with client credentials...");
-var validation = await client.Auth.ValidateAsync();
-Console.WriteLine($"[API] Authenticated as app: {validation.ClientId}");
+try
+{
+    var validation = await client.Auth.ValidateAsync();
+    Console.WriteLine($"[API] Authenticated as: {validation.ClientId}");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"[API] Auth failed: {ex.Message}");
+    Console.WriteLine("Check your TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET in the .env file.");
+    return;
+}
 Console.WriteLine();
 
 Console.WriteLine("[API] Looking up user 'twitchdev'...");
