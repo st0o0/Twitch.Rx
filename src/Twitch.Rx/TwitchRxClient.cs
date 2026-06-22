@@ -22,6 +22,8 @@ internal sealed class TwitchRxClient(
         await eventSub.DisposeAsync();
         await auth.DisposeAsync();
         foreach (var client in ownedHttpClients)
+        {
             client.Dispose();
+        }
     }
 }

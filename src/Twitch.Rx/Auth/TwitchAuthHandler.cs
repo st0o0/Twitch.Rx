@@ -57,7 +57,9 @@ internal sealed class TwitchAuthHandler(ITwitchAuth auth, string clientId) : Del
                 var resetAt = DateTimeOffset.FromUnixTimeSeconds(epoch);
                 var delay = resetAt - DateTimeOffset.UtcNow;
                 if (delay > TimeSpan.Zero)
+                {
                     return delay;
+                }
             }
         }
         return TimeSpan.FromSeconds(1);
@@ -71,7 +73,9 @@ internal sealed class TwitchAuthHandler(ITwitchAuth auth, string clientId) : Del
         {
             clone.Content = new ByteArrayContent(body);
             if (contentType is not null)
+            {
                 clone.Content.Headers.ContentType = contentType;
+            }
         }
         foreach (var header in request.Headers)
         {

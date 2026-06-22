@@ -24,7 +24,10 @@ public sealed class TwitchRxBuilder
 
         var validator = new TwitchRxOptionsValidator();
         var result = validator.Validate(null, options);
-        if (result.Failed) throw new InvalidOperationException(result.FailureMessage);
+        if (result.Failed)
+        {
+            throw new InvalidOperationException(result.FailureMessage);
+        }
 
         var tokenStore = _tokenStore ?? new InMemoryTokenStore();
         var ownedClients = new List<HttpClient>();

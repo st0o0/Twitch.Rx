@@ -43,11 +43,17 @@ internal sealed class EventSubTransport : IAsyncDisposable
 
     private void OnMessage(Message message)
     {
-        if (!message.IsText) return;
+        if (!message.IsText)
+        {
+            return;
+        }
 
         var envelope = JsonSerializer.Deserialize(
             message.Text.Span, EventSubJsonContext.Default.EventSubEnvelope);
-        if (envelope is null) return;
+        if (envelope is null)
+        {
+            return;
+        }
 
         ResetKeepaliveTimer();
         _messages.OnNext(envelope);
@@ -62,7 +68,10 @@ internal sealed class EventSubTransport : IAsyncDisposable
                         ? TimeSpan.FromSeconds(secs + 5)
                         : null);
                 if (timeout is not null)
+                {
                     StartKeepaliveTimer(timeout.Value);
+                }
+
                 break;
 
             case "session_reconnect" when envelope.Payload.Session?.ReconnectUrl is not null:

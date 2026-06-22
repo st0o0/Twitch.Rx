@@ -43,7 +43,8 @@ internal sealed class EventSubRouter : IDisposable
         ChatMessage = Route<ChatMessageEvent>(notifications, EventSubType.ChatMessage);
         ChannelSubscribe = Route<ChannelSubscribeEvent>(notifications, EventSubType.ChannelSubscribe);
         ChannelRaid = Route<ChannelRaidEvent>(notifications, EventSubType.ChannelRaid);
-        ChannelPointsRedemption = Route<ChannelPointsRedemptionEvent>(notifications, EventSubType.ChannelPointsRedemption);
+        ChannelPointsRedemption =
+            Route<ChannelPointsRedemptionEvent>(notifications, EventSubType.ChannelPointsRedemption);
 
         RawNotifications = notifications
             .Where(e => !KnownTypes.Contains(e.Metadata.SubscriptionType!))
@@ -61,7 +62,10 @@ internal sealed class EventSubRouter : IDisposable
             .Where(e => e.Metadata.SubscriptionType == type)
             .Select(e =>
             {
-                try { return e.Payload.Event!.Value.Deserialize<T>(); }
+                try
+                {
+                    return e.Payload.Event!.Value.Deserialize<T>();
+                }
                 catch (JsonException ex)
                 {
                     _errors.OnNext(new EventSubError($"Failed to deserialize {type}", ex));

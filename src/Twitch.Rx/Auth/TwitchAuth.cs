@@ -46,17 +46,23 @@ public sealed class TwitchAuth : ITwitchAuth
 
         var cached = await _tokenStore.GetAsync(ct);
         if (cached is not null && !cached.IsExpired)
+        {
             return cached;
+        }
 
         await _lock.WaitAsync(ct);
         try
         {
             cached = await _tokenStore.GetAsync(ct);
             if (cached is not null && !cached.IsExpired)
+            {
                 return cached;
+            }
 
             if (cached?.RefreshToken is not null)
+            {
                 return await RefreshTokenCoreAsync(cached.RefreshToken, ct);
+            }
 
             return await AcquireClientCredentialsAsync(ct);
         }
@@ -72,7 +78,9 @@ public sealed class TwitchAuth : ITwitchAuth
             var refreshToken = cached?.RefreshToken ?? _options.RefreshToken;
 
             if (refreshToken is not null)
+            {
                 return await RefreshTokenCoreAsync(refreshToken, ct);
+            }
 
             // No refresh token available — re-acquire via client credentials
             return await AcquireClientCredentialsAsync(ct);

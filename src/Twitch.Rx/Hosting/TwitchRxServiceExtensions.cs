@@ -1,7 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Twitch.Rx.Api;
-using Twitch.Rx.Auth;
-using Twitch.Rx.EventSub;
 
 namespace Twitch.Rx.Hosting;
 
