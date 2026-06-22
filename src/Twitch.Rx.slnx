@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Twitch.Rx\Twitch.Rx.csproj" />
+  <Project Path="Twitch.Rx.Tests\Twitch.Rx.Tests.csproj" />
+  <Project Path="Twitch.Rx.Examples\Twitch.Rx.Examples.csproj" />
+</Solution>
