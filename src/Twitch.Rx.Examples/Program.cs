@@ -2,6 +2,8 @@ using R3;
 using Twitch.Rx;
 using Twitch.Rx.EventSub;
 
+LoadEnvFile();
+
 var clientId = Environment.GetEnvironmentVariable("TWITCH_CLIENT_ID");
 var clientSecret = Environment.GetEnvironmentVariable("TWITCH_CLIENT_SECRET");
 var accessToken = Environment.GetEnvironmentVariable("TWITCH_ACCESS_TOKEN");
@@ -123,3 +125,24 @@ catch (Exception ex)
 }
 
 Console.WriteLine("Disconnected. Bye!");
+
+static void LoadEnvFile()
+{
+    foreach (var path in new[] { ".env", "../.env", "../../.env", "../../../.env" })
+    {
+        if (!File.Exists(path)) continue;
+        foreach (var line in File.ReadAllLines(path))
+        {
+            var trimmed = line.Trim();
+            if (trimmed.Length == 0 || trimmed.StartsWith('#')) continue;
+            var sep = trimmed.IndexOf('=');
+            if (sep <= 0) continue;
+            var key = trimmed[..sep].Trim();
+            var value = trimmed[(sep + 1)..].Trim();
+            if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
+                Environment.SetEnvironmentVariable(key, value);
+        }
+        Console.WriteLine($"[ENV] Loaded {Path.GetFullPath(path)}");
+        return;
+    }
+}
