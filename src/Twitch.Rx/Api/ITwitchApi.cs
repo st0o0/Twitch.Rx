@@ -6,4 +6,5 @@ public interface ITwitchApi
 {
     IUsersEndpoint Users { get; }
     IPollsEndpoint Polls { get; }
+    IChatEndpoint Chat { get; }
 }

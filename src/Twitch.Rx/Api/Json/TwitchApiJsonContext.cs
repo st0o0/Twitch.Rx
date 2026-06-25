@@ -7,4 +7,5 @@ namespace Twitch.Rx.Api.Json;
 [JsonSerializable(typeof(CreatePollDto))]
 [JsonSerializable(typeof(EndPollDto))]
 [JsonSerializable(typeof(TwitchDataResponse<PollDto>))]
+[JsonSerializable(typeof(SendChatMessageDto))]
 internal partial class TwitchApiJsonContext : JsonSerializerContext;

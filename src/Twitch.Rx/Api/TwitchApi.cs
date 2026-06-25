@@ -6,4 +6,5 @@ internal sealed class TwitchApi(HttpClient httpClient) : ITwitchApi
 {
     public IUsersEndpoint Users { get; } = new UsersEndpoint(httpClient);
     public IPollsEndpoint Polls { get; } = new PollsEndpoint(httpClient);
+    public IChatEndpoint Chat { get; } = new ChatEndpoint(httpClient);
 }
