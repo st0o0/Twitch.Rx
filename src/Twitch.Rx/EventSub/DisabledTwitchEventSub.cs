@@ -15,6 +15,9 @@ internal sealed class DisabledTwitchEventSub : ITwitchEventSub
     public Observable<ChannelSubscribeEvent> ChannelSubscribe => Observable.Empty<ChannelSubscribeEvent>();
     public Observable<ChannelRaidEvent> ChannelRaid => Observable.Empty<ChannelRaidEvent>();
     public Observable<ChannelPointsRedemptionEvent> ChannelPointsRedemption => Observable.Empty<ChannelPointsRedemptionEvent>();
+    public Observable<PollBeginEvent> PollBegin => Observable.Empty<PollBeginEvent>();
+    public Observable<PollProgressEvent> PollProgress => Observable.Empty<PollProgressEvent>();
+    public Observable<PollEndEvent> PollEnd => Observable.Empty<PollEndEvent>();
     public Observable<RawEventSubNotification> RawNotifications => Observable.Empty<RawEventSubNotification>();
     public Observable<EventSubError> Errors => Observable.Empty<EventSubError>();
 

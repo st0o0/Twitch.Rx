@@ -5,4 +5,5 @@ namespace Twitch.Rx.Api;
 public interface ITwitchApi
 {
     IUsersEndpoint Users { get; }
+    IPollsEndpoint Polls { get; }
 }

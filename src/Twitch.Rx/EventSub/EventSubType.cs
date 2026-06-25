@@ -9,4 +9,7 @@ public static class EventSubType
     public const string ChannelSubscribe = "channel.subscribe";
     public const string ChannelRaid = "channel.raid";
     public const string ChannelPointsRedemption = "channel.channel_points_custom_reward_redemption.add";
+    public const string ChannelPollBegin = "channel.poll.begin";
+    public const string ChannelPollProgress = "channel.poll.progress";
+    public const string ChannelPollEnd = "channel.poll.end";
 }

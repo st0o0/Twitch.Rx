@@ -11,7 +11,8 @@ internal sealed class EventSubRouter : IDisposable
     [
         EventSubType.ChannelFollow, EventSubType.StreamOnline, EventSubType.StreamOffline,
         EventSubType.ChatMessage, EventSubType.ChannelSubscribe,
-        EventSubType.ChannelRaid, EventSubType.ChannelPointsRedemption
+        EventSubType.ChannelRaid, EventSubType.ChannelPointsRedemption,
+        EventSubType.ChannelPollBegin, EventSubType.ChannelPollProgress, EventSubType.ChannelPollEnd
     ];
 
     private readonly Subject<EventSubError> _errors = new();
@@ -24,6 +25,9 @@ internal sealed class EventSubRouter : IDisposable
     public Observable<ChannelSubscribeEvent> ChannelSubscribe { get; }
     public Observable<ChannelRaidEvent> ChannelRaid { get; }
     public Observable<ChannelPointsRedemptionEvent> ChannelPointsRedemption { get; }
+    public Observable<PollBeginEvent> PollBegin { get; }
+    public Observable<PollProgressEvent> PollProgress { get; }
+    public Observable<PollEndEvent> PollEnd { get; }
     public Observable<RawEventSubNotification> RawNotifications { get; }
     public Observable<EventSubError> Errors => _errors;
 
@@ -45,6 +49,9 @@ internal sealed class EventSubRouter : IDisposable
         ChannelRaid = Route<ChannelRaidEvent>(notifications, EventSubType.ChannelRaid);
         ChannelPointsRedemption =
             Route<ChannelPointsRedemptionEvent>(notifications, EventSubType.ChannelPointsRedemption);
+        PollBegin = Route<PollBeginEvent>(notifications, EventSubType.ChannelPollBegin);
+        PollProgress = Route<PollProgressEvent>(notifications, EventSubType.ChannelPollProgress);
+        PollEnd = Route<PollEndEvent>(notifications, EventSubType.ChannelPollEnd);
 
         RawNotifications = notifications
             .Where(e => !KnownTypes.Contains(e.Metadata.SubscriptionType!))

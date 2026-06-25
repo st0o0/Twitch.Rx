@@ -19,6 +19,9 @@ internal sealed class TwitchEventSub : ITwitchEventSub
     public Observable<ChannelSubscribeEvent> ChannelSubscribe => _router.ChannelSubscribe;
     public Observable<ChannelRaidEvent> ChannelRaid => _router.ChannelRaid;
     public Observable<ChannelPointsRedemptionEvent> ChannelPointsRedemption => _router.ChannelPointsRedemption;
+    public Observable<PollBeginEvent> PollBegin => _router.PollBegin;
+    public Observable<PollProgressEvent> PollProgress => _router.PollProgress;
+    public Observable<PollEndEvent> PollEnd => _router.PollEnd;
     public Observable<RawEventSubNotification> RawNotifications => _router.RawNotifications;
     public Observable<EventSubError> Errors => Observable.Merge(_router.Errors, _errors);
 

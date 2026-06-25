@@ -14,6 +14,9 @@ public interface ITwitchEventSub : IAsyncDisposable
     Observable<ChannelSubscribeEvent> ChannelSubscribe { get; }
     Observable<ChannelRaidEvent> ChannelRaid { get; }
     Observable<ChannelPointsRedemptionEvent> ChannelPointsRedemption { get; }
+    Observable<PollBeginEvent> PollBegin { get; }
+    Observable<PollProgressEvent> PollProgress { get; }
+    Observable<PollEndEvent> PollEnd { get; }
 
     Observable<RawEventSubNotification> RawNotifications { get; }
     Observable<EventSubError> Errors { get; }
