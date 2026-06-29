@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.0](https://github.com/st0o0/Twitch.Rx/compare/v0.1.0...v0.2.0) (2026-06-29)
+
+
+### Features
+
+* **deps:** Remove R3 dependency ([f9f6baf](https://github.com/st0o0/Twitch.Rx/commit/f9f6bafb4fe6dbe7a0a533d925daccc8ee3fc4f2))
+* Enhance NuGet package metadata ([ee02d9f](https://github.com/st0o0/Twitch.Rx/commit/ee02d9f1fd75a72c73bac4f08cec3bb4e41578a6))
+
 ## [0.1.0](https://github.com/st0o0/Twitch.Rx/compare/v0.1.0...v0.1.0) (2026-06-29)
 
 
