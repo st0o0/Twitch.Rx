@@ -1,9 +1,11 @@
 using System.Text.Json.Serialization;
 using Twitch.Rx.Helix.Bits;
+using Twitch.Rx.Helix.ChannelPoints;
 using Twitch.Rx.Helix.Channels;
 using Twitch.Rx.Helix.Chat;
 using Twitch.Rx.Helix.Clips;
 using Twitch.Rx.Helix.Games;
+using Twitch.Rx.Helix.Moderation;
 using Twitch.Rx.Helix.Polls;
 using Twitch.Rx.Helix.Predictions;
 using Twitch.Rx.Helix.Streams;
@@ -71,4 +73,25 @@ internal sealed record HelixErrorDto(
 [JsonSerializable(typeof(HelixResponse<CreatedClipDto>))]
 [JsonSerializable(typeof(HelixResponse<ClipDto>))]
 [JsonSerializable(typeof(HelixPaginatedResponse<ClipDto>))]
+// ChannelPoints
+[JsonSerializable(typeof(HelixResponse<CustomRewardDto>))]
+[JsonSerializable(typeof(CreateCustomRewardDto))]
+[JsonSerializable(typeof(UpdateCustomRewardDto))]
+[JsonSerializable(typeof(HelixPaginatedResponse<RedemptionDto>))]
+[JsonSerializable(typeof(UpdateRedemptionStatusDto))]
+// Moderation
+[JsonSerializable(typeof(BanUserRequestDto))]
+[JsonSerializable(typeof(HelixResponse<BanResponseDto>))]
+[JsonSerializable(typeof(HelixPaginatedResponse<BannedUserDto>))]
+[JsonSerializable(typeof(HelixPaginatedResponse<BlockedTermDto>))]
+[JsonSerializable(typeof(AddBlockedTermDto))]
+[JsonSerializable(typeof(HelixResponse<BlockedTermDto>))]
+[JsonSerializable(typeof(HelixResponse<AutoModSettingsDto>))]
+[JsonSerializable(typeof(UpdateAutoModSettingsDto))]
+[JsonSerializable(typeof(HelixPaginatedResponse<ModeratorDto>))]
+[JsonSerializable(typeof(HelixPaginatedResponse<VipDto>))]
+[JsonSerializable(typeof(EmptyModRequestDto))]
+[JsonSerializable(typeof(HelixResponse<ShieldModeStatusDto>))]
+[JsonSerializable(typeof(UpdateShieldModeDto))]
+[JsonSerializable(typeof(WarnUserRequestDto))]
 internal partial class HelixJsonContext : JsonSerializerContext;
