@@ -1,9 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <RootNamespace>Twitch.Rx</RootNamespace>
-  </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="R3" />
     <PackageReference Include="WebSocket.Rx" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Http" />
