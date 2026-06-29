@@ -1,15 +1,20 @@
 using R3;
+using Twitch.Rx.Helix.Analytics;
 using Twitch.Rx.Helix.Bits;
 using Twitch.Rx.Helix.ChannelPoints;
 using Twitch.Rx.Helix.Channels;
+using Twitch.Rx.Helix.Charity;
 using Twitch.Rx.Helix.Chat;
 using Twitch.Rx.Helix.Clips;
 using Twitch.Rx.Helix.Games;
+using Twitch.Rx.Helix.HypeTrain;
 using Twitch.Rx.Helix.Moderation;
 using Twitch.Rx.Helix.Polls;
 using Twitch.Rx.Helix.Predictions;
+using Twitch.Rx.Helix.Search;
 using Twitch.Rx.Helix.Streams;
 using Twitch.Rx.Helix.Subscriptions;
+using Twitch.Rx.Helix.Teams;
 using Twitch.Rx.Helix.Users;
 using Twitch.Rx.Helix.Videos;
 
@@ -30,6 +35,11 @@ public interface ITwitchHelixApi
     IClipsEndpoint Clips { get; }
     IChannelPointsEndpoint ChannelPoints { get; }
     IModerationEndpoint Moderation { get; }
+    ISearchEndpoint Search { get; }
+    ITeamsEndpoint Teams { get; }
+    IHypeTrainEndpoint HypeTrain { get; }
+    IAnalyticsEndpoint Analytics { get; }
+    ICharityEndpoint Charity { get; }
 
     Observable<HelixError> Errors { get; }
 }
