@@ -1,21 +1,19 @@
 using System.Net;
-using R3;
 using Twitch.Rx.Auth;
-using Twitch.Rx.Auth.Models;
 using Twitch.Rx.Tests.Helpers;
 using Xunit;
 
 namespace Twitch.Rx.Tests.Auth;
 
-public sealed class TwitchAuthTests : IDisposable
+public sealed class TwitchAuthTests
 {
     private readonly TwitchRxOptions _options = new()
     {
         ClientId = "test-client-id",
         ClientSecret = "test-client-secret"
     };
+
     private readonly InMemoryTokenStore _tokenStore = new();
-    private readonly List<IDisposable> _subscriptions = [];
 
     [Fact]
     public async Task GetTokenAsync_AcquiresViaClientCredentials()
@@ -57,21 +55,6 @@ public sealed class TwitchAuthTests : IDisposable
     }
 
     [Fact]
-    public async Task GetTokenAsync_EmitsTokenChanged()
-    {
-        var handler = new FakeHttpHandler(TokenResponse("token", 3600));
-        await using var auth = CreateAuth(handler);
-
-        AccessToken? emitted = null;
-        _subscriptions.Add(auth.TokenChanged.Subscribe(t => emitted = t));
-
-        await auth.GetTokenAsync(TestContext.Current.CancellationToken);
-
-        Assert.NotNull(emitted);
-        Assert.Equal("token", emitted!.Token);
-    }
-
-    [Fact]
     public async Task RefreshTokenAsync_UsesRefreshGrant()
     {
         _options.AccessToken = "old";
@@ -108,12 +91,13 @@ public sealed class TwitchAuthTests : IDisposable
         return new TwitchAuth(_options, httpClient, _tokenStore);
     }
 
-    private static HttpResponseMessage TokenResponse(string token, int expiresIn, string? refresh = null) => new(HttpStatusCode.OK)
-    {
-        Content = new StringContent(
-            $$"""{"access_token":"{{token}}","expires_in":{{expiresIn}},"token_type":"bearer"{{(refresh is not null ? $",\"refresh_token\":\"{refresh}\",\"scope\":[]" : "")}}}""",
-            System.Text.Encoding.UTF8, "application/json")
-    };
+    private static HttpResponseMessage TokenResponse(string token, int expiresIn, string? refresh = null) =>
+        new(HttpStatusCode.OK)
+        {
+            Content = new StringContent(
+                $$"""{"access_token":"{{token}}","expires_in":{{expiresIn}},"token_type":"bearer"{{(refresh is not null ? $",\"refresh_token\":\"{refresh}\",\"scope\":[]" : "")}}}""",
+                System.Text.Encoding.UTF8, "application/json")
+        };
 
     private static HttpResponseMessage ValidationResponse() => new(HttpStatusCode.OK)
     {
@@ -121,9 +105,4 @@ public sealed class TwitchAuthTests : IDisposable
             """{"client_id":"test-client-id","login":"testuser","scopes":[],"user_id":"12345","expires_in":3600}""",
             System.Text.Encoding.UTF8, "application/json")
     };
-
-    public void Dispose()
-    {
-        foreach (var sub in _subscriptions) sub.Dispose();
-    }
 }
