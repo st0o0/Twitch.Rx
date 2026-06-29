@@ -1,15 +1,20 @@
 using System.Text.Json.Serialization;
+using Twitch.Rx.Helix.Analytics;
 using Twitch.Rx.Helix.Bits;
 using Twitch.Rx.Helix.ChannelPoints;
 using Twitch.Rx.Helix.Channels;
+using Twitch.Rx.Helix.Charity;
 using Twitch.Rx.Helix.Chat;
 using Twitch.Rx.Helix.Clips;
 using Twitch.Rx.Helix.Games;
+using Twitch.Rx.Helix.HypeTrain;
 using Twitch.Rx.Helix.Moderation;
 using Twitch.Rx.Helix.Polls;
 using Twitch.Rx.Helix.Predictions;
+using Twitch.Rx.Helix.Search;
 using Twitch.Rx.Helix.Streams;
 using Twitch.Rx.Helix.Subscriptions;
+using Twitch.Rx.Helix.Teams;
 using Twitch.Rx.Helix.Users;
 using Twitch.Rx.Helix.Videos;
 
@@ -79,6 +84,20 @@ internal sealed record HelixErrorDto(
 [JsonSerializable(typeof(UpdateCustomRewardDto))]
 [JsonSerializable(typeof(HelixPaginatedResponse<RedemptionDto>))]
 [JsonSerializable(typeof(UpdateRedemptionStatusDto))]
+// Search
+[JsonSerializable(typeof(HelixPaginatedResponse<CategoryDto>))]
+[JsonSerializable(typeof(HelixPaginatedResponse<SearchChannelDto>))]
+// Teams
+[JsonSerializable(typeof(HelixResponse<TeamDto>))]
+[JsonSerializable(typeof(HelixResponse<ChannelTeamDto>))]
+// HypeTrain
+[JsonSerializable(typeof(HelixPaginatedResponse<HypeTrainEventDto>))]
+// Analytics
+[JsonSerializable(typeof(HelixPaginatedResponse<ExtensionAnalyticsDto>))]
+[JsonSerializable(typeof(HelixPaginatedResponse<GameAnalyticsDto>))]
+// Charity
+[JsonSerializable(typeof(HelixResponse<CharityCampaignDto>))]
+[JsonSerializable(typeof(HelixPaginatedResponse<CharityDonationDto>))]
 // Moderation
 [JsonSerializable(typeof(BanUserRequestDto))]
 [JsonSerializable(typeof(HelixResponse<BanResponseDto>))]
