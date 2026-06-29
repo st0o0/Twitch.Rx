@@ -1,7 +1,11 @@
 using R3;
 using Twitch.Rx.Helix.Channels;
 using Twitch.Rx.Helix.Chat;
+using Twitch.Rx.Helix.Games;
+using Twitch.Rx.Helix.Streams;
+using Twitch.Rx.Helix.Subscriptions;
 using Twitch.Rx.Helix.Users;
+using Twitch.Rx.Helix.Videos;
 
 namespace Twitch.Rx.Helix;
 
@@ -14,6 +18,10 @@ internal sealed class DisabledTwitchHelixApi : ITwitchHelixApi
     public IUsersEndpoint Users => Throw<IUsersEndpoint>();
     public IChannelsEndpoint Channels => Throw<IChannelsEndpoint>();
     public IChatEndpoint Chat => Throw<IChatEndpoint>();
+    public IStreamsEndpoint Streams => Throw<IStreamsEndpoint>();
+    public ISubscriptionsEndpoint Subscriptions => Throw<ISubscriptionsEndpoint>();
+    public IGamesEndpoint Games => Throw<IGamesEndpoint>();
+    public IVideosEndpoint Videos => Throw<IVideosEndpoint>();
 
     public Observable<HelixError> Errors => Throw<Observable<HelixError>>();
 }
