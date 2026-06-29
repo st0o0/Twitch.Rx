@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Twitch.Rx.Helix.Users;
 
 namespace Twitch.Rx.Helix;
 
@@ -8,4 +9,7 @@ internal sealed record HelixErrorDto(
     [property: JsonPropertyName("message")] string Message);
 
 [JsonSerializable(typeof(HelixErrorDto))]
+[JsonSerializable(typeof(HelixResponse<UserDto>))]
+[JsonSerializable(typeof(HelixPaginatedResponse<UserDto>))]
+[JsonSerializable(typeof(UpdateUserDto))]
 internal partial class HelixJsonContext : JsonSerializerContext;
