@@ -1,7 +1,11 @@
 using System.Text.Json.Serialization;
 using Twitch.Rx.Helix.Channels;
 using Twitch.Rx.Helix.Chat;
+using Twitch.Rx.Helix.Games;
+using Twitch.Rx.Helix.Streams;
+using Twitch.Rx.Helix.Subscriptions;
 using Twitch.Rx.Helix.Users;
+using Twitch.Rx.Helix.Videos;
 
 namespace Twitch.Rx.Helix;
 
@@ -31,4 +35,18 @@ internal sealed record HelixErrorDto(
 [JsonSerializable(typeof(EmptyRequestDto))]
 [JsonSerializable(typeof(SendChatMessageDto))]
 [JsonSerializable(typeof(HelixResponse<UserChatColorDto>))]
+// Streams
+[JsonSerializable(typeof(HelixPaginatedResponse<StreamDto>))]
+[JsonSerializable(typeof(CreateMarkerDto))]
+[JsonSerializable(typeof(HelixResponse<StreamMarkerDto>))]
+[JsonSerializable(typeof(HelixPaginatedResponse<StreamMarkerGroupDto>))]
+// Subscriptions
+[JsonSerializable(typeof(HelixPaginatedResponse<SubscriptionDto>))]
+[JsonSerializable(typeof(HelixResponse<UserSubscriptionDto>))]
+// Games
+[JsonSerializable(typeof(HelixPaginatedResponse<GameDto>))]
+[JsonSerializable(typeof(HelixResponse<GameDto>))]
+// Videos
+[JsonSerializable(typeof(HelixPaginatedResponse<VideoDto>))]
+[JsonSerializable(typeof(HelixResponse<VideoDto>))]
 internal partial class HelixJsonContext : JsonSerializerContext;
