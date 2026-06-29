@@ -1,7 +1,11 @@
 using System.Text.Json.Serialization;
+using Twitch.Rx.Helix.Bits;
 using Twitch.Rx.Helix.Channels;
 using Twitch.Rx.Helix.Chat;
+using Twitch.Rx.Helix.Clips;
 using Twitch.Rx.Helix.Games;
+using Twitch.Rx.Helix.Polls;
+using Twitch.Rx.Helix.Predictions;
 using Twitch.Rx.Helix.Streams;
 using Twitch.Rx.Helix.Subscriptions;
 using Twitch.Rx.Helix.Users;
@@ -49,4 +53,22 @@ internal sealed record HelixErrorDto(
 // Videos
 [JsonSerializable(typeof(HelixPaginatedResponse<VideoDto>))]
 [JsonSerializable(typeof(HelixResponse<VideoDto>))]
+// Polls
+[JsonSerializable(typeof(HelixPaginatedResponse<PollDto>))]
+[JsonSerializable(typeof(HelixResponse<PollDto>))]
+[JsonSerializable(typeof(CreatePollDto))]
+[JsonSerializable(typeof(EndPollDto))]
+// Predictions
+[JsonSerializable(typeof(HelixPaginatedResponse<PredictionDto>))]
+[JsonSerializable(typeof(HelixResponse<PredictionDto>))]
+[JsonSerializable(typeof(CreatePredictionDto))]
+[JsonSerializable(typeof(EndPredictionDto))]
+// Bits
+[JsonSerializable(typeof(BitsLeaderboardResponseDto))]
+[JsonSerializable(typeof(HelixResponse<CheermoteDto>))]
+[JsonSerializable(typeof(HelixPaginatedResponse<ExtensionTransactionDto>))]
+// Clips
+[JsonSerializable(typeof(HelixResponse<CreatedClipDto>))]
+[JsonSerializable(typeof(HelixResponse<ClipDto>))]
+[JsonSerializable(typeof(HelixPaginatedResponse<ClipDto>))]
 internal partial class HelixJsonContext : JsonSerializerContext;

@@ -1,7 +1,11 @@
 using R3;
+using Twitch.Rx.Helix.Bits;
 using Twitch.Rx.Helix.Channels;
 using Twitch.Rx.Helix.Chat;
+using Twitch.Rx.Helix.Clips;
 using Twitch.Rx.Helix.Games;
+using Twitch.Rx.Helix.Polls;
+using Twitch.Rx.Helix.Predictions;
 using Twitch.Rx.Helix.Streams;
 using Twitch.Rx.Helix.Subscriptions;
 using Twitch.Rx.Helix.Users;
@@ -22,6 +26,10 @@ internal sealed class DisabledTwitchHelixApi : ITwitchHelixApi
     public ISubscriptionsEndpoint Subscriptions => Throw<ISubscriptionsEndpoint>();
     public IGamesEndpoint Games => Throw<IGamesEndpoint>();
     public IVideosEndpoint Videos => Throw<IVideosEndpoint>();
+    public IPollsEndpoint Polls => Throw<IPollsEndpoint>();
+    public IPredictionsEndpoint Predictions => Throw<IPredictionsEndpoint>();
+    public IBitsEndpoint Bits => Throw<IBitsEndpoint>();
+    public IClipsEndpoint Clips => Throw<IClipsEndpoint>();
 
     public Observable<HelixError> Errors => Throw<Observable<HelixError>>();
 }
