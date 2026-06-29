@@ -1,5 +1,5 @@
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using R3;
 using Twitch.Rx.Auth.Models;
 using Twitch.Rx.Json;
 
@@ -11,12 +11,8 @@ public sealed class TwitchAuth : ITwitchAuth
     private readonly HttpClient _httpClient;
     private readonly ITokenStore _tokenStore;
     private readonly SemaphoreSlim _lock = new(1, 1);
-    private readonly Subject<AccessToken> _tokenChanged = new();
-    private readonly Subject<AuthError> _errors = new();
     private volatile bool _seeded;
 
-    public Observable<AccessToken> TokenChanged => _tokenChanged;
-    public Observable<AuthError> Errors => _errors;
 
     public TwitchAuth(TwitchRxOptions options, HttpClient httpClient, ITokenStore tokenStore)
     {
@@ -92,7 +88,7 @@ public sealed class TwitchAuth : ITwitchAuth
     {
         var token = await GetTokenAsync(ct);
         using var request = new HttpRequestMessage(HttpMethod.Get, "/oauth2/validate");
-        request.Headers.Authorization = new("Bearer", token.Token);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
 
         var response = await _httpClient.SendAsync(request, ct);
         response.EnsureSuccessStatusCode();
@@ -149,15 +145,12 @@ public sealed class TwitchAuth : ITwitchAuth
             dto.RefreshToken, dto.Scope ?? [], DateTimeOffset.UtcNow);
 
         await _tokenStore.SetAsync(token, ct);
-        _tokenChanged.OnNext(token);
         _seeded = true;
         return token;
     }
 
     public ValueTask DisposeAsync()
     {
-        _tokenChanged.Dispose();
-        _errors.Dispose();
         _lock.Dispose();
         return ValueTask.CompletedTask;
     }

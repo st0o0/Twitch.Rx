@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Headers;
 using NSubstitute;
 using Twitch.Rx.Auth;
 using Twitch.Rx.Auth.Models;
