@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using R3;
 
@@ -140,7 +141,7 @@ internal abstract class HelixEndpoint(HttpClient httpClient, Subject<HelixError>
             errorMessage = errorDto?.Message ?? "";
             errorType = errorDto?.Error ?? response.StatusCode.ToString();
         }
-        catch
+        catch (JsonException)
         {
             errorMessage = await response.Content.ReadAsStringAsync(ct);
             errorType = response.StatusCode.ToString();
