@@ -82,6 +82,13 @@ internal abstract class HelixEndpoint(HttpClient httpClient, Subject<HelixError>
         return result.Data[0];
     }
 
+    protected async Task PutAsync(string url, CancellationToken ct)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Put, url);
+        using var response = await httpClient.SendAsync(request, ct);
+        await EnsureSuccessAsync(response, HttpMethod.Put, url, ct);
+    }
+
     protected async Task DeleteAsync(string url, CancellationToken ct)
     {
         using var response = await httpClient.DeleteAsync(url, ct);
