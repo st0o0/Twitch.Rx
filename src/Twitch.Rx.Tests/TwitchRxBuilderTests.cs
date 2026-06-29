@@ -1,4 +1,3 @@
-using Twitch.Rx;
 using Xunit;
 
 namespace Twitch.Rx.Tests;
@@ -16,7 +15,7 @@ public sealed class TwitchRxBuilderTests
 
         Assert.NotNull(client);
         Assert.NotNull(client.Auth);
-        Assert.NotNull(client.Api);
+        Assert.NotNull(client.Helix);
         Assert.NotNull(client.EventSub);
     }
 
@@ -31,16 +30,16 @@ public sealed class TwitchRxBuilderTests
     }
 
     [Fact]
-    public void Build_WithApiDisabled_ReturnsDisabledApi()
+    public void Build_WithHelixDisabled_ReturnsDisabledHelix()
     {
         var client = TwitchRx.CreateBuilder(o =>
         {
             o.ClientId = "id";
             o.ClientSecret = "secret";
-            o.Api.Enabled = false;
+            o.Helix.Enabled = false;
         }).Build();
 
-        var ex = Assert.Throws<InvalidOperationException>(() => client.Api.Users);
+        var ex = Assert.Throws<InvalidOperationException>(() => client.Helix.Users);
         Assert.Contains("not enabled", ex.Message);
     }
 
@@ -53,7 +52,6 @@ public sealed class TwitchRxBuilderTests
             o.ClientSecret = "secret";
         }).Build();
 
-        // EventSub.Enabled defaults to false - just await; it'll throw if broken
         await client.EventSub.ConnectAsync(TestContext.Current.CancellationToken);
     }
 
@@ -65,7 +63,7 @@ public sealed class TwitchRxBuilderTests
             o.ClientId = "id";
             o.ClientSecret = "secret";
             o.Auth.BaseUrl = new Uri("https://custom-auth.example.com");
-            o.Api.BaseUrl = new Uri("https://custom-api.example.com");
+            o.Helix.BaseUrl = new Uri("https://custom-api.example.com");
         }).Build();
 
         Assert.NotNull(client);

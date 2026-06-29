@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Twitch.Rx.Helix;
 
 namespace Twitch.Rx.Hosting;
 
@@ -14,7 +15,7 @@ public static class TwitchRxServiceExtensions
             return builder.Build();
         });
         services.AddSingleton(sp => sp.GetRequiredService<ITwitchRxClient>().Auth);
-        services.AddSingleton(sp => sp.GetRequiredService<ITwitchRxClient>().Api);
+        services.AddSingleton(sp => sp.GetRequiredService<ITwitchRxClient>().Helix);
         services.AddSingleton(sp => sp.GetRequiredService<ITwitchRxClient>().EventSub);
 
         return services;
