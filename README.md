@@ -1,5 +1,4 @@
 <div align="center">
-  <img src="assets/logo.svg" alt="Twitch.Rx Logo" width="128" height="128" />
 
   <h1>Twitch.Rx</h1>
   <p><strong>Reactive Twitch integration for .NET — EventSub, Helix API, and OAuth2 powered by R3</strong></p>
@@ -7,56 +6,43 @@
   [![NuGet](https://img.shields.io/nuget/v/Twitch.Rx?style=flat-square)](https://www.nuget.org/packages/Twitch.Rx)
   [![License](https://img.shields.io/github/license/st0o0/Twitch.Rx?style=flat-square)](LICENSE.md)
   [![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?style=flat-square)](https://dotnet.microsoft.com)
-  [![CI](https://img.shields.io/github/actions/workflow/status/st0o0/Twitch.Rx/ci.yml?style=flat-square&label=CI)](https://github.com/st0o0/Twitch.Rx/actions)
+
 </div>
 
 ---
 
-## 📋 Table of Contents
+## Features
 
-- [Features](#-features)
-- [Installation](#-installation)
-- [Quick Start](#-quick-start)
-- [Core Concepts](#-core-concepts)
-- [Advanced Usage](#-advanced-usage)
-- [API Reference](#-api-reference)
-- [Contributing](#-contributing)
-- [License](#-license)
+**EventSub (WebSocket)**
+- Reactive WebSocket connection via [WebSocket.Rx](https://github.com/st0o0/WebSocket.Rx)
+- Typed `Observable<T>` streams for all event types (follows, subs, raids, chat, channel points, polls)
+- Automatic reconnection with `session_reconnect` handling
+- Keepalive timeout detection with configurable watchdog
+- `ConnectionState` observable for monitoring connection lifecycle
+- Raw notification stream for unsupported event types
 
----
+**Helix REST API**
+- 28 endpoint categories — full Twitch API coverage
+- Automatic Bearer token + Client-Id injection via `DelegatingHandler`
+- Automatic token refresh on 401 and rate-limit handling on 429
+- Cursor-based pagination with `IAsyncEnumerable`
+- `IHttpClientFactory` support for DI, injectable `HttpClient` for standalone
 
-## ✨ Features
+**Authentication**
+- Client Credentials flow (app access tokens)
+- Token refresh flow (user access tokens)
+- Pluggable `ITokenStore` (in-memory default, bring your own)
+- `ValueTask` on hot paths — zero allocation for cached tokens
 
-### EventSub (WebSocket)
-- 🔌 Reactive WebSocket connection via [WebSocket.Rx](https://github.com/st0o0/WebSocket.Rx)
-- 📡 Typed `Observable<T>` streams for all event types (follows, subs, raids, chat, channel points)
-- 🔄 Automatic reconnection with `session_reconnect` handling
-- 💓 Keepalive timeout detection with configurable watchdog
-- 📊 `ConnectionState` observable for monitoring connection lifecycle
-- 🔗 Raw notification stream for unsupported event types
-
-### Helix REST API
-- 👤 Users endpoint with lookup by ID and login
-- 🔐 Automatic Bearer token + Client-Id injection via `DelegatingHandler`
-- 🔁 Automatic token refresh on 401 and rate-limit handling on 429
-- 🏭 `IHttpClientFactory` support for DI, injectable `HttpClient` for standalone
-
-### Authentication
-- 🎫 Client Credentials flow (app access tokens)
-- 🔄 Token refresh flow (user access tokens)
-- 💾 Pluggable `ITokenStore` (in-memory default, bring your own)
-- ⚡ `ValueTask` on hot paths — zero allocation for cached tokens
-- 📢 `TokenChanged` and `Errors` observables for monitoring
-
-### General
-- ⚙️ Options pattern with sensible defaults — no hardcoded URLs
-- 🏗️ Standalone builder and DI integration (`AddTwitchRx()`)
-- 🧊 AOT-compatible via `System.Text.Json` source generators
-- 🎯 .NET 10 only — modern APIs, no legacy baggage
+**General**
+- Options pattern with sensible defaults — no hardcoded URLs
+- Standalone builder and DI integration (`AddTwitchRx()`)
+- AOT-compatible via `System.Text.Json` source generators
+- .NET 10 only — modern APIs, no legacy baggage
 
 ---
 
-## 📦 Installation
+## Installation
 
 ```bash
 dotnet add package Twitch.Rx
@@ -66,9 +52,9 @@ dotnet add package Twitch.Rx
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
-### Standalone Usage
+### Standalone
 
 ```csharp
 using Twitch.Rx;
@@ -93,7 +79,7 @@ using var sub = client.EventSub.ChatMessage.Subscribe(e =>
 await client.ConnectAsync();
 
 // Use the Helix API
-var user = await client.Api.Users.GetByLoginAsync("twitchdev");
+var user = await client.Helix.Users.GetByLoginAsync("twitchdev");
 Console.WriteLine($"Found: {user?.DisplayName}");
 ```
 
@@ -116,7 +102,7 @@ await client.ConnectAsync();
 
 ---
 
-## 🎓 Core Concepts
+## Core Concepts
 
 ### Observable Event Streams
 
@@ -140,7 +126,7 @@ Monitor the WebSocket connection lifecycle:
 ```csharp
 client.EventSub.ConnectionState.Subscribe(state =>
 {
-    // Disconnected → Connecting → Connected → Reconnecting → ...
+    // Disconnected -> Connecting -> Connected -> Reconnecting -> ...
     Console.WriteLine($"State: {state}");
 });
 ```
@@ -153,8 +139,8 @@ Errors are surfaced as observables — never silently swallowed:
 client.EventSub.Errors.Subscribe(error =>
     Console.WriteLine($"EventSub error: {error.Message}"));
 
-client.Auth.Errors.Subscribe(error =>
-    Console.WriteLine($"Auth error: {error.Message}"));
+client.Helix.Errors.Subscribe(error =>
+    Console.WriteLine($"Helix error: {error.Message}"));
 ```
 
 ### Raw Notifications
@@ -163,12 +149,12 @@ Receive events that don't have a typed model yet:
 
 ```csharp
 client.EventSub.RawNotifications.Subscribe(raw =>
-    Console.WriteLine($"Untyped event: {raw.SubscriptionType} → {raw.Event}"));
+    Console.WriteLine($"Untyped event: {raw.SubscriptionType} -> {raw.Event}"));
 ```
 
 ---
 
-## 🔧 Advanced Usage
+## Advanced Usage
 
 ### Custom Configuration
 
@@ -181,7 +167,6 @@ TwitchRx.CreateBuilder(options =>
     options.ClientSecret = "...";
 
     options.Auth.BaseUrl = new Uri("https://id.twitch.tv");
-    options.Api.BaseUrl = new Uri("https://api.twitch.tv");
     options.EventSub.WebSocketUrl = new Uri("wss://eventsub.wss.twitch.tv/ws");
 
     options.EventSub.AutoReconnect = true;
@@ -213,7 +198,7 @@ Control HTTP behavior (proxies, custom handlers, Polly policies):
 ```csharp
 var client = TwitchRx.CreateBuilder(options => { ... })
     .WithAuthHttpClient(myAuthClient)
-    .WithApiHttpClient(myApiClient)
+    .WithHelixHttpClient(myHelixClient)
     .Build();
 ```
 
@@ -226,21 +211,20 @@ TwitchRx.CreateBuilder(options =>
 {
     options.ClientId = "...";
     options.ClientSecret = "...";
-    options.Api.Enabled = false;      // Disable Helix API
     options.EventSub.Enabled = false; // Disable EventSub (default)
 });
 ```
 
 ---
 
-## 📚 API Reference
+## API Reference
 
 ### ITwitchRxClient
 
 | Property | Type | Description |
 |----------|------|-------------|
 | `Auth` | `ITwitchAuth` | OAuth2 token management |
-| `Api` | `ITwitchApi` | Helix REST API endpoints |
+| `Helix` | `ITwitchHelixApi` | Helix REST API (28 endpoint categories) |
 | `EventSub` | `ITwitchEventSub` | EventSub WebSocket event streams |
 
 | Method | Returns | Description |
@@ -259,9 +243,47 @@ TwitchRx.CreateBuilder(options =>
 | `ChannelSubscribe` | `ChannelSubscribeEvent` | New subscription |
 | `ChannelRaid` | `ChannelRaidEvent` | Incoming raid |
 | `ChannelPointsRedemption` | `ChannelPointsRedemptionEvent` | Channel points redeemed |
+| `PollBegin` | `PollBeginEvent` | Poll started |
+| `PollProgress` | `PollProgressEvent` | Poll votes updated |
+| `PollEnd` | `PollEndEvent` | Poll ended |
 | `RawNotifications` | `RawEventSubNotification` | Untyped event fallback |
 | `ConnectionState` | `EventSubConnectionState` | Connection lifecycle |
 | `Errors` | `EventSubError` | Error stream |
+
+### ITwitchHelixApi
+
+28 endpoint categories:
+
+| Endpoint | Interface | Examples |
+|----------|-----------|---------|
+| `Users` | `IUsersEndpoint` | Lookup by ID/login, update |
+| `Channels` | `IChannelsEndpoint` | Channel info, modification |
+| `Chat` | `IChatEndpoint` | Send messages, emotes |
+| `Streams` | `IStreamsEndpoint` | Live streams, markers |
+| `Subscriptions` | `ISubscriptionsEndpoint` | Subscriber data |
+| `Games` | `IGamesEndpoint` | Game lookup |
+| `Videos` | `IVideosEndpoint` | Video metadata |
+| `Polls` | `IPollsEndpoint` | Create/manage polls |
+| `Predictions` | `IPredictionsEndpoint` | Channel predictions |
+| `Bits` | `IBitsEndpoint` | Bits leaderboard |
+| `Clips` | `IClipsEndpoint` | Clip management |
+| `ChannelPoints` | `IChannelPointsEndpoint` | Custom rewards |
+| `Moderation` | `IModerationEndpoint` | Bans, timeouts, shoutouts |
+| `Search` | `ISearchEndpoint` | Channels, categories |
+| `Teams` | `ITeamsEndpoint` | Team info |
+| `HypeTrain` | `IHypeTrainEndpoint` | Hype train data |
+| `Analytics` | `IAnalyticsEndpoint` | Extension/game analytics |
+| `Charity` | `ICharityEndpoint` | Charity campaigns |
+| `Ads` | `IAdsEndpoint` | Ad snooze/schedule |
+| `Conduits` | `IConduitsEndpoint` | EventSub conduits |
+| `ContentClassification` | `IContentClassificationEndpoint` | Content labels |
+| `Entitlements` | `IEntitlementsEndpoint` | Drop entitlements |
+| `Extensions` | `IExtensionsEndpoint` | Extension info |
+| `Goals` | `IGoalsEndpoint` | Creator goals |
+| `GuestStar` | `IGuestStarEndpoint` | Guest Star sessions |
+| `Raids` | `IRaidsEndpoint` | Raid management |
+| `Schedule` | `IScheduleEndpoint` | Stream schedule |
+| `Whispers` | `IWhispersEndpoint` | Whisper messages |
 
 ### ITwitchAuth
 
@@ -273,17 +295,13 @@ TwitchRx.CreateBuilder(options =>
 
 ---
 
-## 🤝 Contributing
-
-### How to Contribute
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/my-feature`)
 3. Make your changes
 4. Run tests (`dotnet test src/Twitch.Rx.slnx`)
 5. Open a Pull Request
-
-### Development Setup
 
 ```bash
 git clone https://github.com/st0o0/Twitch.Rx.git
@@ -294,16 +312,16 @@ dotnet test src/Twitch.Rx.slnx
 
 ---
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License — see the [LICENSE.md](LICENSE.md) file for details.
+MIT — see [LICENSE.md](LICENSE.md) for details.
 
 ---
 
 <div align="center">
-  <p>Built with ❤️ using <a href="https://github.com/Cysharp/R3">R3</a> and <a href="https://github.com/st0o0/WebSocket.Rx">WebSocket.Rx</a></p>
-  <p>
-    <a href="https://github.com/st0o0/Twitch.Rx/issues">Report Bug</a> ·
-    <a href="https://github.com/st0o0/Twitch.Rx/issues">Request Feature</a>
-  </p>
+  <sub>Built with <a href="https://github.com/Cysharp/R3">R3</a> and <a href="https://github.com/st0o0/WebSocket.Rx">WebSocket.Rx</a></sub>
+  <br/>
+  <sub>
+    <a href="https://github.com/st0o0/Twitch.Rx/issues">Report Bug</a> · <a href="https://github.com/st0o0/Twitch.Rx/issues">Request Feature</a>
+  </sub>
 </div>

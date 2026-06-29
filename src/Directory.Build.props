@@ -6,4 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>st0o0</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/st0o0/Twitch.Rx</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/st0o0/Twitch.Rx</PackageProjectUrl>
+    <PackageTags>twitch;eventsub;helix;reactive;r3;websocket;observable;streaming;chat;api</PackageTags>
+  </PropertyGroup>
 </Project>

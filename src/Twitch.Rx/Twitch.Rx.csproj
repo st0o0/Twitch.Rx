@@ -1,4 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Reactive Twitch integration for .NET — EventSub WebSocket streams, Helix REST API, and OAuth2 powered by R3. Subscribe to Twitch events as Observable&lt;T&gt; streams with automatic reconnection, token refresh, and rate-limit handling.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="WebSocket.Rx" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
