@@ -1,9 +1,11 @@
 using R3;
 using Twitch.Rx.Helix.Bits;
+using Twitch.Rx.Helix.ChannelPoints;
 using Twitch.Rx.Helix.Channels;
 using Twitch.Rx.Helix.Chat;
 using Twitch.Rx.Helix.Clips;
 using Twitch.Rx.Helix.Games;
+using Twitch.Rx.Helix.Moderation;
 using Twitch.Rx.Helix.Polls;
 using Twitch.Rx.Helix.Predictions;
 using Twitch.Rx.Helix.Streams;
@@ -30,6 +32,8 @@ internal sealed class TwitchHelixApi : ITwitchHelixApi
         Predictions = new PredictionsEndpoint(httpClient, _errors);
         Bits = new BitsEndpoint(httpClient, _errors);
         Clips = new ClipsEndpoint(httpClient, _errors);
+        ChannelPoints = new ChannelPointsEndpoint(httpClient, _errors);
+        Moderation = new ModerationEndpoint(httpClient, _errors);
     }
 
     public IUsersEndpoint Users { get; }
@@ -43,6 +47,8 @@ internal sealed class TwitchHelixApi : ITwitchHelixApi
     public IPredictionsEndpoint Predictions { get; }
     public IBitsEndpoint Bits { get; }
     public IClipsEndpoint Clips { get; }
+    public IChannelPointsEndpoint ChannelPoints { get; }
+    public IModerationEndpoint Moderation { get; }
 
     public Observable<HelixError> Errors => _errors;
 }

@@ -14,7 +14,7 @@ internal abstract class HelixEndpoint(HttpClient httpClient, Subject<HelixError>
         using var response = await httpClient.GetAsync(url, ct);
         await EnsureSuccessAsync(response, HttpMethod.Get, url, ct);
         var result = await response.Content.ReadFromJsonAsync(typeInfo, ct)
-            ?? throw new InvalidOperationException("Failed to deserialize response.");
+                     ?? throw new InvalidOperationException("Failed to deserialize response.");
         return result.Data.Length > 0 ? result.Data[0] : default;
     }
 
@@ -24,7 +24,7 @@ internal abstract class HelixEndpoint(HttpClient httpClient, Subject<HelixError>
         using var response = await httpClient.GetAsync(url, ct);
         await EnsureSuccessAsync(response, HttpMethod.Get, url, ct);
         var result = await response.Content.ReadFromJsonAsync(typeInfo, ct)
-            ?? throw new InvalidOperationException("Failed to deserialize response.");
+                     ?? throw new InvalidOperationException("Failed to deserialize response.");
         return result.Data;
     }
 
@@ -33,24 +33,20 @@ internal abstract class HelixEndpoint(HttpClient httpClient, Subject<HelixError>
         JsonTypeInfo<TReq> reqInfo, JsonTypeInfo<HelixResponse<TRes>> resInfo,
         CancellationToken ct)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Post, url)
-        {
-            Content = JsonContent.Create(body, reqInfo)
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Post, url);
+        request.Content = JsonContent.Create(body, reqInfo);
         using var response = await httpClient.SendAsync(request, ct);
         await EnsureSuccessAsync(response, HttpMethod.Post, url, ct);
         var result = await response.Content.ReadFromJsonAsync(resInfo, ct)
-            ?? throw new InvalidOperationException("Failed to deserialize response.");
+                     ?? throw new InvalidOperationException("Failed to deserialize response.");
         return result.Data[0];
     }
 
     protected async Task PostAsync<TReq>(
         string url, TReq body, JsonTypeInfo<TReq> reqInfo, CancellationToken ct)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Post, url)
-        {
-            Content = JsonContent.Create(body, reqInfo)
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Post, url);
+        request.Content = JsonContent.Create(body, reqInfo);
         using var response = await httpClient.SendAsync(request, ct);
         await EnsureSuccessAsync(response, HttpMethod.Post, url, ct);
     }
@@ -62,7 +58,7 @@ internal abstract class HelixEndpoint(HttpClient httpClient, Subject<HelixError>
         using var response = await httpClient.SendAsync(request, ct);
         await EnsureSuccessAsync(response, HttpMethod.Post, url, ct);
         var result = await response.Content.ReadFromJsonAsync(resInfo, ct)
-            ?? throw new InvalidOperationException("Failed to deserialize response.");
+                     ?? throw new InvalidOperationException("Failed to deserialize response.");
         return result.Data[0];
     }
 
@@ -72,16 +68,14 @@ internal abstract class HelixEndpoint(HttpClient httpClient, Subject<HelixError>
         using var response = await httpClient.GetAsync(url, ct);
         await EnsureSuccessAsync(response, HttpMethod.Get, url, ct);
         return await response.Content.ReadFromJsonAsync(typeInfo, ct)
-            ?? throw new InvalidOperationException("Failed to deserialize response.");
+               ?? throw new InvalidOperationException("Failed to deserialize response.");
     }
 
     protected async Task PatchAsync<TReq>(
         string url, TReq body, JsonTypeInfo<TReq> reqInfo, CancellationToken ct)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Patch, url)
-        {
-            Content = JsonContent.Create(body, reqInfo)
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Patch, url);
+        request.Content = JsonContent.Create(body, reqInfo);
         using var response = await httpClient.SendAsync(request, ct);
         await EnsureSuccessAsync(response, HttpMethod.Patch, url, ct);
     }
@@ -91,14 +85,12 @@ internal abstract class HelixEndpoint(HttpClient httpClient, Subject<HelixError>
         JsonTypeInfo<TReq> reqInfo, JsonTypeInfo<HelixResponse<TRes>> resInfo,
         CancellationToken ct)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Patch, url)
-        {
-            Content = JsonContent.Create(body, reqInfo)
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Patch, url);
+        request.Content = JsonContent.Create(body, reqInfo);
         using var response = await httpClient.SendAsync(request, ct);
         await EnsureSuccessAsync(response, HttpMethod.Patch, url, ct);
         var result = await response.Content.ReadFromJsonAsync(resInfo, ct)
-            ?? throw new InvalidOperationException("Failed to deserialize response.");
+                     ?? throw new InvalidOperationException("Failed to deserialize response.");
         return result.Data[0];
     }
 
@@ -107,6 +99,22 @@ internal abstract class HelixEndpoint(HttpClient httpClient, Subject<HelixError>
         using var request = new HttpRequestMessage(HttpMethod.Put, url);
         using var response = await httpClient.SendAsync(request, ct);
         await EnsureSuccessAsync(response, HttpMethod.Put, url, ct);
+    }
+
+    protected async Task<TRes> PutAsync<TReq, TRes>(
+        string url, TReq body,
+        JsonTypeInfo<TReq> reqInfo, JsonTypeInfo<HelixResponse<TRes>> resInfo,
+        CancellationToken ct)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Put, url)
+        {
+            Content = JsonContent.Create(body, reqInfo)
+        };
+        using var response = await httpClient.SendAsync(request, ct);
+        await EnsureSuccessAsync(response, HttpMethod.Put, url, ct);
+        var result = await response.Content.ReadFromJsonAsync(resInfo, ct)
+                     ?? throw new InvalidOperationException("Failed to deserialize response.");
+        return result.Data[0];
     }
 
     protected async Task DeleteAsync(string url, CancellationToken ct)
@@ -128,7 +136,7 @@ internal abstract class HelixEndpoint(HttpClient httpClient, Subject<HelixError>
             using var response = await httpClient.GetAsync(pageUrl, ct);
             await EnsureSuccessAsync(response, HttpMethod.Get, pageUrl, ct);
             var result = await response.Content.ReadFromJsonAsync(typeInfo, ct)
-                ?? throw new InvalidOperationException("Failed to deserialize response.");
+                         ?? throw new InvalidOperationException("Failed to deserialize response.");
 
             foreach (var item in result.Data)
                 yield return mapper(item);
@@ -147,13 +155,13 @@ internal abstract class HelixEndpoint(HttpClient httpClient, Subject<HelixError>
         using var response = await httpClient.GetAsync(pageUrl, ct);
         await EnsureSuccessAsync(response, HttpMethod.Get, pageUrl, ct);
         var result = await response.Content.ReadFromJsonAsync(typeInfo, ct)
-            ?? throw new InvalidOperationException("Failed to deserialize response.");
+                     ?? throw new InvalidOperationException("Failed to deserialize response.");
         var items = result.Data.Select(mapper).ToArray();
         return new Page<TModel>(items, result.Pagination?.Cursor);
     }
 
-    private async Task EnsureSuccessAsync(
-        HttpResponseMessage response, HttpMethod method, string url, CancellationToken ct)
+    private async Task EnsureSuccessAsync(HttpResponseMessage response, HttpMethod method, string url,
+        CancellationToken ct)
     {
         if (response.IsSuccessStatusCode) return;
 
