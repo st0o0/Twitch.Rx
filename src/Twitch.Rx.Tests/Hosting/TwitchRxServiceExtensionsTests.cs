@@ -1,7 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
-using Twitch.Rx.Api;
 using Twitch.Rx.Auth;
 using Twitch.Rx.EventSub;
+using Twitch.Rx.Helix;
 using Twitch.Rx.Hosting;
 using Xunit;
 
@@ -23,7 +23,7 @@ public sealed class TwitchRxServiceExtensionsTests
 
         Assert.NotNull(provider.GetRequiredService<ITwitchRxClient>());
         Assert.NotNull(provider.GetRequiredService<ITwitchAuth>());
-        Assert.NotNull(provider.GetRequiredService<ITwitchApi>());
+        Assert.NotNull(provider.GetRequiredService<ITwitchHelixApi>());
         Assert.NotNull(provider.GetRequiredService<ITwitchEventSub>());
     }
 

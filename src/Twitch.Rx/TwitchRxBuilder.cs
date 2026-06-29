@@ -1,6 +1,6 @@
-using Twitch.Rx.Api;
 using Twitch.Rx.Auth;
 using Twitch.Rx.EventSub;
+using Twitch.Rx.Helix;
 
 namespace Twitch.Rx;
 
@@ -9,13 +9,13 @@ public sealed class TwitchRxBuilder
     private readonly Action<TwitchRxOptions> _configure;
     private ITokenStore? _tokenStore;
     private HttpClient? _authHttpClient;
-    private HttpClient? _apiHttpClient;
+    private HttpClient? _helixHttpClient;
 
     internal TwitchRxBuilder(Action<TwitchRxOptions> configure) => _configure = configure;
 
     public TwitchRxBuilder WithTokenStore(ITokenStore store) { _tokenStore = store; return this; }
     public TwitchRxBuilder WithAuthHttpClient(HttpClient client) { _authHttpClient = client; return this; }
-    public TwitchRxBuilder WithApiHttpClient(HttpClient client) { _apiHttpClient = client; return this; }
+    public TwitchRxBuilder WithHelixHttpClient(HttpClient client) { _helixHttpClient = client; return this; }
 
     public ITwitchRxClient Build()
     {
@@ -40,20 +40,22 @@ public sealed class TwitchRxBuilder
         }
         var auth = new TwitchAuth(options, authHttpClient, tokenStore);
 
-        var apiHttpClient = _apiHttpClient;
-        if (apiHttpClient is null)
+        var helixHttpClient = _helixHttpClient;
+        if (helixHttpClient is null)
         {
             var handler = new TwitchAuthHandler(auth, options.ClientId) { InnerHandler = new HttpClientHandler() };
-            apiHttpClient = new HttpClient(handler) { BaseAddress = options.Api.BaseUrl };
-            ownedClients.Add(apiHttpClient);
+            helixHttpClient = new HttpClient(handler) { BaseAddress = options.Helix.BaseUrl };
+            ownedClients.Add(helixHttpClient);
         }
 
-        ITwitchApi api = options.Api.Enabled ? new TwitchApi(apiHttpClient) : new DisabledTwitchApi();
+        ITwitchHelixApi helix = options.Helix.Enabled
+            ? new TwitchHelixApi(helixHttpClient)
+            : new DisabledTwitchHelixApi();
 
         ITwitchEventSub eventSub = options.EventSub.Enabled
-            ? new TwitchEventSub(options.EventSub, apiHttpClient, options.ClientId)
+            ? new TwitchEventSub(options.EventSub, helixHttpClient, options.ClientId)
             : new DisabledTwitchEventSub();
 
-        return new TwitchRxClient(auth, api, eventSub, [.. ownedClients]);
+        return new TwitchRxClient(auth, helix, eventSub, [.. ownedClients]);
     }
 }

@@ -1,17 +1,17 @@
-using Twitch.Rx.Api;
 using Twitch.Rx.Auth;
 using Twitch.Rx.EventSub;
+using Twitch.Rx.Helix;
 
 namespace Twitch.Rx;
 
 internal sealed class TwitchRxClient(
     ITwitchAuth auth,
-    ITwitchApi api,
+    ITwitchHelixApi helix,
     ITwitchEventSub eventSub,
     HttpClient[] ownedHttpClients) : ITwitchRxClient
 {
     public ITwitchAuth Auth => auth;
-    public ITwitchApi Api => api;
+    public ITwitchHelixApi Helix => helix;
     public ITwitchEventSub EventSub => eventSub;
 
     public Task ConnectAsync(CancellationToken ct = default) => eventSub.ConnectAsync(ct);

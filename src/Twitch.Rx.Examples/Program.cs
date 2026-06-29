@@ -53,7 +53,7 @@ catch (Exception ex)
 Console.WriteLine();
 
 Console.WriteLine("[API] Looking up user 'st0o0'...");
-var user = await apiClient.Api.Users.GetByLoginAsync("st0o0");
+var user = await apiClient.Helix.Users.GetByLoginAsync("st0o0");
 if (user is not null)
     Console.WriteLine($"[API] Found: {user.DisplayName} (ID: {user.Id}, Type: {user.BroadcasterType})");
 Console.WriteLine();

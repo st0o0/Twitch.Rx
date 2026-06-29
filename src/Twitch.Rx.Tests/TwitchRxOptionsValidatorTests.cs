@@ -50,8 +50,8 @@ public sealed class TwitchRxOptionsValidatorTests
         };
 
         Assert.Equal(new Uri("https://id.twitch.tv"), options.Auth.BaseUrl);
-        Assert.Equal(new Uri("https://api.twitch.tv"), options.Api.BaseUrl);
-        Assert.True(options.Api.Enabled);
+        Assert.Equal(new Uri("https://api.twitch.tv"), options.Helix.BaseUrl);
+        Assert.True(options.Helix.Enabled);
         Assert.Equal(new Uri("wss://eventsub.wss.twitch.tv/ws"), options.EventSub.WebSocketUrl);
         Assert.False(options.EventSub.Enabled);
         Assert.True(options.EventSub.AutoReconnect);
