@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Twitch.Rx.Helix.Ads;
 using Twitch.Rx.Helix.Analytics;
 using Twitch.Rx.Helix.Bits;
 using Twitch.Rx.Helix.ChannelPoints;
@@ -6,17 +7,26 @@ using Twitch.Rx.Helix.Channels;
 using Twitch.Rx.Helix.Charity;
 using Twitch.Rx.Helix.Chat;
 using Twitch.Rx.Helix.Clips;
+using Twitch.Rx.Helix.Conduits;
+using Twitch.Rx.Helix.ContentClassification;
+using Twitch.Rx.Helix.Entitlements;
+using Twitch.Rx.Helix.Extensions;
 using Twitch.Rx.Helix.Games;
+using Twitch.Rx.Helix.Goals;
+using Twitch.Rx.Helix.GuestStar;
 using Twitch.Rx.Helix.HypeTrain;
 using Twitch.Rx.Helix.Moderation;
 using Twitch.Rx.Helix.Polls;
 using Twitch.Rx.Helix.Predictions;
+using Twitch.Rx.Helix.Raids;
+using Twitch.Rx.Helix.Schedule;
 using Twitch.Rx.Helix.Search;
 using Twitch.Rx.Helix.Streams;
 using Twitch.Rx.Helix.Subscriptions;
 using Twitch.Rx.Helix.Teams;
 using Twitch.Rx.Helix.Users;
 using Twitch.Rx.Helix.Videos;
+using Twitch.Rx.Helix.Whispers;
 
 namespace Twitch.Rx.Helix;
 
@@ -113,4 +123,39 @@ internal sealed record HelixErrorDto(
 [JsonSerializable(typeof(HelixResponse<ShieldModeStatusDto>))]
 [JsonSerializable(typeof(UpdateShieldModeDto))]
 [JsonSerializable(typeof(WarnUserRequestDto))]
+// Ads
+[JsonSerializable(typeof(StartCommercialDto))]
+[JsonSerializable(typeof(HelixResponse<CommercialDto>))]
+// Conduits
+[JsonSerializable(typeof(HelixResponse<ConduitDto>))]
+[JsonSerializable(typeof(CreateConduitDto))]
+[JsonSerializable(typeof(UpdateConduitDto))]
+[JsonSerializable(typeof(HelixPaginatedResponse<ConduitShardDto>))]
+[JsonSerializable(typeof(HelixResponse<ConduitShardDto>))]
+[JsonSerializable(typeof(UpdateShardsRequestDto))]
+// ContentClassification
+[JsonSerializable(typeof(HelixResponse<ContentClassificationLabelDto>))]
+// Entitlements
+[JsonSerializable(typeof(HelixPaginatedResponse<DropsEntitlementDto>))]
+[JsonSerializable(typeof(UpdateDropsEntitlementsDto))]
+[JsonSerializable(typeof(HelixResponse<UpdatedEntitlementDto>))]
+// Extensions
+[JsonSerializable(typeof(HelixResponse<ExtensionDto>))]
+[JsonSerializable(typeof(ActiveExtensionsResponseDto))]
+[JsonSerializable(typeof(HelixResponse<ExtensionBitsProductDto>))]
+// Goals
+[JsonSerializable(typeof(HelixResponse<CreatorGoalDto>))]
+// GuestStar
+[JsonSerializable(typeof(HelixResponse<GuestStarSettingsDto>))]
+[JsonSerializable(typeof(UpdateGuestStarSettingsDto))]
+[JsonSerializable(typeof(HelixResponse<GuestStarSessionDto>))]
+[JsonSerializable(typeof(HelixResponse<GuestStarInviteDto>))]
+// Raids
+[JsonSerializable(typeof(HelixResponse<RaidInfoDto>))]
+// Schedule
+[JsonSerializable(typeof(ScheduleWrapperDto))]
+[JsonSerializable(typeof(CreateScheduleSegmentDto))]
+[JsonSerializable(typeof(UpdateScheduleSegmentDto))]
+// Whispers
+[JsonSerializable(typeof(WhisperDto))]
 internal partial class HelixJsonContext : JsonSerializerContext;

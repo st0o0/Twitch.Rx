@@ -8,6 +8,8 @@ namespace Twitch.Rx.Helix;
 
 internal abstract class HelixEndpoint(HttpClient httpClient, Subject<HelixError> errors)
 {
+    protected HttpClient Http => httpClient;
+
     protected async Task<T?> GetFirstAsync<T>(
         string url, JsonTypeInfo<HelixResponse<T>> typeInfo, CancellationToken ct)
     {
@@ -121,6 +123,90 @@ internal abstract class HelixEndpoint(HttpClient httpClient, Subject<HelixError>
     {
         using var response = await httpClient.DeleteAsync(url, ct);
         await EnsureSuccessAsync(response, HttpMethod.Delete, url, ct);
+    }
+
+    protected async Task PostAsync(string url, CancellationToken ct)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, url);
+        using var response = await httpClient.SendAsync(request, ct);
+        await EnsureSuccessAsync(response, HttpMethod.Post, url, ct);
+    }
+
+    protected async Task PutAsync<TReq>(
+        string url, TReq body, JsonTypeInfo<TReq> reqInfo, CancellationToken ct)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Put, url)
+        {
+            Content = JsonContent.Create(body, reqInfo)
+        };
+        using var response = await httpClient.SendAsync(request, ct);
+        await EnsureSuccessAsync(response, HttpMethod.Put, url, ct);
+    }
+
+    protected async Task PatchAsync(string url, CancellationToken ct)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Patch, url);
+        using var response = await httpClient.SendAsync(request, ct);
+        await EnsureSuccessAsync(response, HttpMethod.Patch, url, ct);
+    }
+
+    protected async Task<IReadOnlyList<TRes>> PatchListAsync<TReq, TRes>(
+        string url, TReq body,
+        JsonTypeInfo<TReq> reqInfo, JsonTypeInfo<HelixResponse<TRes>> resInfo,
+        CancellationToken ct)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Patch, url);
+        request.Content = JsonContent.Create(body, reqInfo);
+        using var response = await httpClient.SendAsync(request, ct);
+        await EnsureSuccessAsync(response, HttpMethod.Patch, url, ct);
+        var result = await response.Content.ReadFromJsonAsync(resInfo, ct)
+                     ?? throw new InvalidOperationException("Failed to deserialize response.");
+        return result.Data;
+    }
+
+    protected async Task<TResponse> PutResponseAsync<TReq, TResponse>(
+        string url, TReq body,
+        JsonTypeInfo<TReq> reqInfo, JsonTypeInfo<TResponse> resInfo,
+        CancellationToken ct)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Put, url)
+        {
+            Content = JsonContent.Create(body, reqInfo)
+        };
+        using var response = await httpClient.SendAsync(request, ct);
+        await EnsureSuccessAsync(response, HttpMethod.Put, url, ct);
+        return await response.Content.ReadFromJsonAsync(resInfo, ct)
+               ?? throw new InvalidOperationException("Failed to deserialize response.");
+    }
+
+    protected async Task<TResponse> PostResponseAsync<TReq, TResponse>(
+        string url, TReq body,
+        JsonTypeInfo<TReq> reqInfo, JsonTypeInfo<TResponse> resInfo,
+        CancellationToken ct)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = JsonContent.Create(body, reqInfo)
+        };
+        using var response = await httpClient.SendAsync(request, ct);
+        await EnsureSuccessAsync(response, HttpMethod.Post, url, ct);
+        return await response.Content.ReadFromJsonAsync(resInfo, ct)
+               ?? throw new InvalidOperationException("Failed to deserialize response.");
+    }
+
+    protected async Task<TResponse> PatchResponseAsync<TReq, TResponse>(
+        string url, TReq body,
+        JsonTypeInfo<TReq> reqInfo, JsonTypeInfo<TResponse> resInfo,
+        CancellationToken ct)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Patch, url)
+        {
+            Content = JsonContent.Create(body, reqInfo)
+        };
+        using var response = await httpClient.SendAsync(request, ct);
+        await EnsureSuccessAsync(response, HttpMethod.Patch, url, ct);
+        return await response.Content.ReadFromJsonAsync(resInfo, ct)
+               ?? throw new InvalidOperationException("Failed to deserialize response.");
     }
 
     protected async IAsyncEnumerable<TModel> GetAllPagesAsync<TDto, TModel>(
