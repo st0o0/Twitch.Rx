@@ -1,7 +1,11 @@
 using R3;
+using Twitch.Rx.Helix.Bits;
 using Twitch.Rx.Helix.Channels;
 using Twitch.Rx.Helix.Chat;
+using Twitch.Rx.Helix.Clips;
 using Twitch.Rx.Helix.Games;
+using Twitch.Rx.Helix.Polls;
+using Twitch.Rx.Helix.Predictions;
 using Twitch.Rx.Helix.Streams;
 using Twitch.Rx.Helix.Subscriptions;
 using Twitch.Rx.Helix.Users;
@@ -18,6 +22,10 @@ public interface ITwitchHelixApi
     ISubscriptionsEndpoint Subscriptions { get; }
     IGamesEndpoint Games { get; }
     IVideosEndpoint Videos { get; }
+    IPollsEndpoint Polls { get; }
+    IPredictionsEndpoint Predictions { get; }
+    IBitsEndpoint Bits { get; }
+    IClipsEndpoint Clips { get; }
 
     Observable<HelixError> Errors { get; }
 }

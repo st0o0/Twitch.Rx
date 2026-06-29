@@ -55,6 +55,26 @@ internal abstract class HelixEndpoint(HttpClient httpClient, Subject<HelixError>
         await EnsureSuccessAsync(response, HttpMethod.Post, url, ct);
     }
 
+    protected async Task<TRes> PostAsync<TRes>(
+        string url, JsonTypeInfo<HelixResponse<TRes>> resInfo, CancellationToken ct)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, url);
+        using var response = await httpClient.SendAsync(request, ct);
+        await EnsureSuccessAsync(response, HttpMethod.Post, url, ct);
+        var result = await response.Content.ReadFromJsonAsync(resInfo, ct)
+            ?? throw new InvalidOperationException("Failed to deserialize response.");
+        return result.Data[0];
+    }
+
+    protected async Task<TResponse> GetResponseAsync<TResponse>(
+        string url, JsonTypeInfo<TResponse> typeInfo, CancellationToken ct)
+    {
+        using var response = await httpClient.GetAsync(url, ct);
+        await EnsureSuccessAsync(response, HttpMethod.Get, url, ct);
+        return await response.Content.ReadFromJsonAsync(typeInfo, ct)
+            ?? throw new InvalidOperationException("Failed to deserialize response.");
+    }
+
     protected async Task PatchAsync<TReq>(
         string url, TReq body, JsonTypeInfo<TReq> reqInfo, CancellationToken ct)
     {

@@ -11,7 +11,10 @@ internal sealed class EventSubTransport : IAsyncDisposable
     private readonly TwitchEventSubOptions _options;
     private readonly Subject<EventSubEnvelope> _messages = new();
     private readonly Subject<string> _sessionId = new();
-    private readonly ReactiveProperty<EventSubConnectionState> _connectionState = new(EventSubConnectionState.Disconnected);
+
+    private readonly ReactiveProperty<EventSubConnectionState> _connectionState =
+        new(EventSubConnectionState.Disconnected);
+
     private IDisposable? _messageSubscription;
     private CancellationTokenSource? _keepaliveCts;
 
@@ -64,9 +67,9 @@ internal sealed class EventSubTransport : IAsyncDisposable
                 _connectionState.Value = EventSubConnectionState.Connected;
                 _sessionId.OnNext(envelope.Payload.Session.Id);
                 var timeout = _options.KeepaliveTimeout
-                    ?? (envelope.Payload.Session.KeepaliveTimeoutSeconds is { } secs
-                        ? TimeSpan.FromSeconds(secs + 5)
-                        : null);
+                              ?? (envelope.Payload.Session.KeepaliveTimeoutSeconds is { } secs
+                                  ? TimeSpan.FromSeconds(secs + 5)
+                                  : null);
                 if (timeout is not null)
                 {
                     StartKeepaliveTimer(timeout.Value);
@@ -120,9 +123,12 @@ internal sealed class EventSubTransport : IAsyncDisposable
         {
             await Task.Delay(timeout, ct);
             _connectionState.Value = EventSubConnectionState.Reconnecting;
-            await _wsClient.ReconnectOrFailAsync();
+            await _wsClient.ReconnectOrFailAsync(ct);
         }
-        catch (OperationCanceledException) { }
+        catch (OperationCanceledException)
+        {
+            // noop
+        }
         catch (Exception)
         {
             _connectionState.Value = EventSubConnectionState.Disconnected;
