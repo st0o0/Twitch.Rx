@@ -7,6 +7,7 @@
     <None Include="..\..\README.md" Pack="true" PackagePath="" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="WebSocket.Rx" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Http" />
